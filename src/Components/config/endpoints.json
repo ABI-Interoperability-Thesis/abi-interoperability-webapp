@@ -1,0 +1,14 @@
+{
+    "mysql-ws": {
+        "dev": "http://127.0.0.1:3002",
+        "prod": "http://mysql-webservice:3000"
+    },
+    "mirth-api": {
+        "dev": "http://127.0.0.1:3000",
+        "prod": "http://mirth-api-webservice:3000"
+    },
+    "preprocessor-ws": {
+        "dev": "http://127.0.0.1:3003",
+        "prod": "http://preprocessing-webservice:3000"
+    }
+}

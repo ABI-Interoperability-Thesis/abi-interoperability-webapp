@@ -1,0 +1,37 @@
+.create-channel-buttons-container{
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.create-channel-mappings-container{
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+}
+
+.mapping-container{
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+.mapping-header{
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mapping-input-label-container{
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.mapping-delete-container{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}

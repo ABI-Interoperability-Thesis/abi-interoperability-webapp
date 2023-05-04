@@ -4,7 +4,9 @@ import { useState } from 'react';
 import Dashboard from './Components/Dashboard/index';
 import Requests from './Components/Requests/index';
 import Channels from './Components/Channels/index';
-import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined } from '@ant-design/icons'
+import Models from './Components/Models/index';
+
+import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined } from '@ant-design/icons'
 import SVGS from './svgs.js'
 import './index.css'
 
@@ -35,6 +37,9 @@ const App = () => {
           <Menu.Item key={'/channels'} icon={<DeploymentUnitOutlined />}>
             <Link to={'/channels'}>Channels</Link>
           </Menu.Item>
+          <Menu.Item key={'/models'} icon={<BranchesOutlined />}>
+            <Link to={'/models'}>Models</Link>
+          </Menu.Item>
         </Menu>
       </Sider>
       <Layout>
@@ -57,7 +62,7 @@ const App = () => {
               height: 64,
             }}
           />
-          <Button type='primary' style={{backgroundColor:'red', marginRight: '1rem'}}>
+          <Button type='primary' style={{ backgroundColor: 'red', marginRight: '1rem' }}>
             Log Out
           </Button>
         </Header>
@@ -74,6 +79,7 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/requests" element={<Requests />} />
             <Route path="/channels" element={<Channels />} />
+            <Route path="/models" element={<Models />} />
           </Routes>
         </Content>
       </Layout>
