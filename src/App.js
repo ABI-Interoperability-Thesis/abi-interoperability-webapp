@@ -5,6 +5,7 @@ import Dashboard from './Components/Dashboard/index';
 import Requests from './Components/Requests/index';
 import Channels from './Components/Channels/index';
 import Models from './Components/Models/index';
+import ModelDetails from './Components/ModelDetails/index';
 
 import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined } from '@ant-design/icons'
 import SVGS from './svgs.js'
@@ -80,6 +81,7 @@ const App = () => {
             <Route path="/requests" element={<Requests />} />
             <Route path="/channels" element={<Channels />} />
             <Route path="/models" element={<Models />} />
+            <Route path="/models/:model_id" element={<ModelDetails />} />
           </Routes>
         </Content>
       </Layout>

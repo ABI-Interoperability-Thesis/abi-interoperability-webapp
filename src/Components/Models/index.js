@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'
 import endpoints from '../config/endpoints.json'
 import './index.css'
 import { Table, Button, Popconfirm, Typography } from 'antd'
@@ -32,17 +33,15 @@ const Models = () => {
       key: 'action',
       render: (text, record) => (
         <div>
-          <Button type='primary' onClick={()=>handleInspect(record)}>
-            Inspect
-          </Button>
+          <Link to={`/models/${record.model_id}`}>
+            <Button type='primary'>
+              Inspect
+            </Button>
+          </Link>
         </div>
       ),
     }
   ]
-
-  const handleInspect = (record) => {
-    console.log(`Inspecting ${JSON.stringify(record)}`)
-  };
 
   return (
     <>
