@@ -1,25 +1,28 @@
 import React from 'react'
-import { Card, Typography } from 'antd'
+import { Card, Typography, Statistic } from 'antd';
+import CountUp from 'react-countup';
+
 import './index.css'
+const formatter = (value) => <CountUp end={value} separator="," />;
 
 const { Title } = Typography;
 
 const Dashboard = () => {
     return (
         <>
-        <Title level={2}>Request Information</Title>
+            <Title level={2}>Request Information</Title>
             <div className='req-info-container'>
-                <Card title="Total Requests" bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Title level={2}>10000</Title>
+                <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
+                    <Statistic title="Total Requests" value={10000} formatter={formatter} />
                 </Card>
-                <Card title="Pending Requests" bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Title level={2} style={{color: '#FF9800'}}>10000</Title>
+                <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
+                    <Statistic title="Total Requests" value={10000} formatter={formatter} valueStyle={{ color: '#FF9800' }} />
                 </Card>
-                <Card title="Answered Requests" bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Title level={2} style={{color: '#4CAF50'}}>10000</Title>
+                <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
+                    <Statistic title="Total Requests" value={10000} formatter={formatter} valueStyle={{ color: '#4CAF50' }}/>
                 </Card>
-                <Card title="Errored Requests" bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Title level={2} style={{color: '#F44336'}}>10000</Title>
+                <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
+                    <Statistic title="Total Requests" value={10000} formatter={formatter} valueStyle={{ color: '#F44336' }}/>
                 </Card>
             </div>
 
