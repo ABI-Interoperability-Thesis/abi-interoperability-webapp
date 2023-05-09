@@ -4,6 +4,7 @@ import endpoints from '../config/endpoints.json'
 import './index.css'
 import { Table, Button, Popconfirm, Typography } from 'antd'
 import axios from 'axios'
+import CreateNew from './CreateNew/index'
 const { Title } = Typography;
 
 const app_env = process.env.REACT_APP_ENV
@@ -12,6 +13,7 @@ const mysql_endpoint = endpoints['mysql-ws'][app_env]
 
 const Models = () => {
   const [data, setData] = useState([]);
+  const [createNew, setCreateNew] = useState(false)
 
   const GetAllModels = async () => {
     const url = `${mysql_endpoint}/api/models`
@@ -45,8 +47,16 @@ const Models = () => {
 
   return (
     <>
-      <Title level={2}>Machine Learning Models</Title>
-      <Table dataSource={data} columns={columns} />
+      {
+        createNew ?
+          <CreateNew setCreateNew={setCreateNew} endpoint={mysql_endpoint} GetAllModels={GetAllModels} />
+          :
+          <>
+            <Title level={2}>Machine Learning Models</Title>
+            <Table dataSource={data} columns={columns} />
+            <Button type='primary' style={{ backgroundColor: '#4CAF50'}} onClick={() => setCreateNew(true)}>Create New Model</Button>
+          </>
+      }
     </>
   )
 }

@@ -54,7 +54,7 @@ const ModelDetails = () => {
                 }
             </Collapse>
             <Link to='/models'>
-                <Button type='primary' style={{ backgroundColor: '#F44336' }}>Back to Models</Button>
+                <Button type='primary' style={{ backgroundColor: '#F44336', marginTop: '1rem' }}>Back to Models</Button>
             </Link>
 
         </>

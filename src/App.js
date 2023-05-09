@@ -6,8 +6,12 @@ import Requests from './Components/Requests/index';
 import Channels from './Components/Channels/index';
 import Models from './Components/Models/index';
 import ModelDetails from './Components/ModelDetails/index';
+import Clients from './Components/Clients/index';
+import ClientDetails from './Components/ClientDetails/index';
+import AttributeMappings from './Components/AttributeMappings/index';
+import About from './Components/About/index';
 
-import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined } from '@ant-design/icons'
+import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined, TeamOutlined, MonitorOutlined, QuestionOutlined } from '@ant-design/icons'
 import SVGS from './svgs.js'
 import './index.css'
 
@@ -40,6 +44,15 @@ const App = () => {
           </Menu.Item>
           <Menu.Item key={'/models'} icon={<BranchesOutlined />}>
             <Link to={'/models'}>Models</Link>
+          </Menu.Item>
+          <Menu.Item key={'/clients'} icon={<TeamOutlined />}>
+            <Link to={'/clients'}>Clients</Link>
+          </Menu.Item>
+          <Menu.Item key={'/attribute-mappings'} icon={<MonitorOutlined />}>
+            <Link to={'/attribute-mappings'}>Attribute Mappings</Link>
+          </Menu.Item>
+          <Menu.Item key={'/about'} icon={<QuestionOutlined />}>
+            <Link to={'/about'}>About</Link>
           </Menu.Item>
         </Menu>
       </Sider>
@@ -82,6 +95,10 @@ const App = () => {
             <Route path="/channels" element={<Channels />} />
             <Route path="/models" element={<Models />} />
             <Route path="/models/:model_id" element={<ModelDetails />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/:client_id" element={<ClientDetails />} />
+            <Route path="/attribute-mappings" element={<AttributeMappings />} />
+            <Route path="/about" element={<About />} />
           </Routes>
         </Content>
       </Layout>

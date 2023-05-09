@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Typography, Button, Input, InputNumber, Select, Card, notification } from 'antd'
+import { Typography, Button, Input, InputNumber, Select, Card, notification, Form } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import './index.css'
 const { Title } = Typography
@@ -8,16 +8,33 @@ const { Title } = Typography
 const CreateChannel = (props) => {
     const setCreateNewChannel = props.setCreateNewChannel
     const mirth_endpoint = props.mirth_endpoint
+    const mysql_endpoint = props.mysql_endpoint
     const preprocessor_endpoint = props.preprocessor_endpoint
-    const [newChannel, setNewChannel] = useState({ channel_port: 1000 })
-    const [mappings, setMappings] = useState([])
     const [preprocessorOptions, setPreprocessorOptions] = useState([])
+    const [modelsData, setModelsData] = useState([])
+    const [modelsDataOptions, setModelsDataOptions] = useState([])
+    const [modelAttributes, setModelAttributes] = useState([])
     const [notificationApi, contextHolder] = notification.useNotification();
 
 
     useEffect(() => {
         GetPreprocessorOptions()
+        GetAllModels()
     }, []);
+
+    const GetAllModels = async () => {
+        const url = `${mysql_endpoint}/api/models`
+        const response = await axios.get(url)
+        console.log(response.data)
+        const processed_data = response.data.map((model) => {
+            return {
+                value: model.model_name,
+                label: model.model_name
+            }
+        })
+        setModelsData(response.data)
+        setModelsDataOptions(processed_data)
+    }
 
     const GetPreprocessorOptions = async () => {
         const url = `${preprocessor_endpoint}/api/preprocessors`
@@ -25,7 +42,7 @@ const CreateChannel = (props) => {
 
         const axios_response = await axios(config)
 
-        const prepared_data = axios_response.data.map((preprocessor)=>{
+        const prepared_data = axios_response.data.map((preprocessor) => {
             return {
                 value: preprocessor,
                 value: preprocessor
@@ -35,84 +52,20 @@ const CreateChannel = (props) => {
         setPreprocessorOptions(prepared_data)
     }
 
-    const handleChannelNameInput = (event) => {
-        const current_channel = newChannel
-        current_channel['channel_name'] = event.target.value
-        setNewChannel(current_channel)
-    }
-
-    const handleChannelPortInput = (value) => {
-        const current_channel = newChannel
-        current_channel['channel_port'] = value
-        setNewChannel(current_channel)
-    }
-
-    const handleModelInput = (value) => {
-        const current_channel = newChannel
-        current_channel['model_name'] = value
-        setNewChannel(current_channel)
-    }
-
-    const handlePreprocessorInput = (value) => {
-        const current_channel = newChannel
-        current_channel['preprocessor'] = value
-        setNewChannel(current_channel)
-    }
-
-    const CreateChannel = async () => {
-        const new_channel_complete = {
-            ...newChannel,
-            mappings
-        }
-
-        const url = `${mirth_endpoint}/api/channels`
-        const config = { method: 'post', url, data: new_channel_complete }
-        console.log(new_channel_complete)
-        const mirth_response = await axios(config)
-
-        mirth_response.status === 200 ? notificationApi.success({
-            message: 'Channel created successfully',
-            description: 'The channel was created successfully'
-        }) : notificationApi.error({
-            message: 'Channel not created',
-            description: 'The channel was not created. There was an error'
+    const GetModelAttributes = async (model_name) => {
+        const model = modelsData.find((model) => model.model_name === model_name);
+        const url = `${mysql_endpoint}/api/model-attributes/${model.model_id}`
+        const response = await axios.get(url)
+        const model_mappings = response.data.map((attribute) => {
+            return {
+                name: attribute.name,
+                map_to: '',
+                hl7_type: '',
+                hl7_triggers: []
+            }
         })
+        setModelAttributes(model_mappings)
     }
-
-    const AddNewMapping = () => {
-        const new_mapping = {
-            name: ''
-        }
-        setMappings(mappings => [...mappings, new_mapping])
-    }
-
-    const RemoveMapping = (mapping_index) => {
-        const newMappings = [...mappings];
-        newMappings.splice(mapping_index, 1);
-        setMappings(newMappings);
-    }
-
-    const HandleMappingInputChange = event => {
-        let index = event.target.getAttribute('arr-index')
-        let attribute = event.target.getAttribute('attribute')
-
-        let newState = [...mappings]
-        newState[index][attribute] = event.target.value
-        setMappings(newState)
-    }
-
-    const HandleMappingInputChangeSelect = (index, value, attribute) => {
-        let newState = [...mappings]
-        newState[index][attribute] = value
-        setMappings(newState)
-    }
-
-    const model_options = [
-        {
-            value: 'hospitalization_pred',
-            label: 'hospitalization_pred'
-        }
-    ]
 
     const message_type_options = [
         {
@@ -159,71 +112,87 @@ const CreateChannel = (props) => {
         }
     ]
 
+    const initialValues = {
+        channel_port: 1000,
+    };
+
+    const onFinish = async (values) => {
+        const new_channel_complete = {
+            ...values,
+            mappings: modelAttributes
+        }
+
+        const url = `${mirth_endpoint}/api/channels`
+        const config = { method: 'post', url, data: new_channel_complete }
+        console.log(new_channel_complete)
+        const mirth_response = await axios(config)
+
+        mirth_response.status === 200 ? notificationApi.success({
+            message: 'Channel created successfully',
+            description: 'The channel was created successfully'
+        }) : notificationApi.error({
+            message: 'Channel not created',
+            description: 'The channel was not created. There was an error'
+        })
+    };
+
+    const UpdateModelAttributes = (index, attribute, value) => {
+        const currentState = [...modelAttributes]
+        currentState[index][attribute] = value
+        setModelAttributes(currentState)
+    }
+
     return (
         <div>
             {contextHolder}
             <Title level={2}>New Channel</Title>
 
-            <Title level={4}>Channel Name</Title>
-            <Input placeholder="Channel Name" onChange={handleChannelNameInput} />
+            <Form initialValues={initialValues} onFinish={onFinish}>
 
-            <Title level={4}>Channel Port</Title>
-            <InputNumber defaultValue={1000} placeholder='Channel Port' min={1000} max={2000} onChange={handleChannelPortInput} />
+                <Form.Item label="Channel Name" name='channel_name'>
+                    <Input placeholder="Enter the channel name" />
+                </Form.Item>
 
-            <Title level={4}>Model</Title>
-            <Select showSearch placeholder="Select a model" onChange={handleModelInput} options={model_options} style={{ width: '10rem' }} />
+                <Form.Item label="Channel Port" name='channel_port'>
+                    <InputNumber defaultValue={1000} placeholder="Enter the channel port" min={1000} max={2000} />
+                </Form.Item>
 
-            <Title level={4}>Preprocessor</Title>
-            <Select showSearch placeholder="Select a preprocessor" onChange={handlePreprocessorInput} options={preprocessorOptions} style={{ width: '10rem' }} />
+                <Form.Item label="Model" name='model_name'>
+                    <Select placeholder="Select the model to use" options={modelsDataOptions} onChange={(value) => GetModelAttributes(value)} />
+                </Form.Item>
 
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', margin: '1.5rem 0 1.5rem 0' }}>
-                <Title level={4} style={{ margin: 0 }}>Mappings</Title>
-                <Button type="primary" size='small' icon={<PlusOutlined />} onClick={AddNewMapping} />
-            </div>
-            <div className='create-channel-mappings-container' >
+                <Form.Item label="Preprocessor" name='preprocessor'>
+                    <Select placeholder="Enter the channel preprocessor" options={preprocessorOptions} />
+                </Form.Item>
+
                 {
-                    mappings.map((mapping, index) => (
-                        <Card key={index} style={{ width: '100%' }}>
-                            <div className='mapping-container'>
-                                <div className='mapping-header'>
-                                    <div className='mapping-input-label-container'>
-                                        <label level={5}>Mapping Name</label>
-                                        <Input value={mapping.name} arr-index={index} attribute="name" onChange={HandleMappingInputChange} placeholder='Mapping Name' />
-                                    </div>
-                                    <div className='mapping-input-label-container'>
-                                        <label level={5}>Message Type</label>
-                                        <Select value={mapping.hl7_type} onChange={(value) => HandleMappingInputChangeSelect(index, value, 'hl7_type')} placeholder='Message Type' options={message_type_options} style={{ width: '100%' }} />
-                                    </div>
-                                    {
-                                        mapping.hl7_type === 'ORU' &&
-                                        <div className='mapping-input-label-container'>
-                                            <label level={5}>Observation Id</label>
-                                            <Select value={mapping.mapping_id} onChange={(value) => HandleMappingInputChangeSelect(index, value, 'mapping_id')} placeholder='Observation Id' options={obersvation_id_options} style={{ width: '100%' }} />
-                                        </div>
-                                    }
-
-                                    <div className='mapping-input-label-container'>
-                                        <label level={5}>Message Triggers</label>
-                                        <Select mode='multiple' value={mapping.hl7_triggers} onChange={(value) => HandleMappingInputChangeSelect(index, value, 'hl7_triggers')} placeholder='Message Triggers' options={message_triggers_options} style={{ width: '100%' }} />
-                                    </div>
-                                </div>
-                                <div className='mapping-input-label-container'>
-                                    <label level={5}>HL7 Mapping</label>
-                                    <Input value={mapping.map_to} placeholder='HL7 Mapping' onChange={HandleMappingInputChange} arr-index={index} attribute="map_to" />
-                                </div>
-                            </div>
-                            <div className='mapping-delete-container'>
-                                <Button danger onClick={() => RemoveMapping(index)} >Delete</Button>
-                            </div>
+                    modelAttributes.map((attribute, index) => (
+                        <Card key={index} title={attribute.name} style={{ marginBottom: '1rem' }}>
+                            <Form.Item label="Attribute HL7 Mapping">
+                                <Input placeholder="Enter the channel port" onChange={(event) => UpdateModelAttributes(index, 'map_to', event.target.value)} />
+                            </Form.Item>
+                            <Form.Item label="Supported Message Type">
+                                <Select options={message_type_options} onChange={(value) => UpdateModelAttributes(index, 'hl7_type', value)} />
+                            </Form.Item>
+                            {
+                                attribute.hl7_type === 'ORU' &&
+                                <Form.Item label="Observation Id">
+                                    <Select options={obersvation_id_options} onChange={(value) => UpdateModelAttributes(index, 'mapping_id', value)} />
+                                </Form.Item>
+                            }
+                            <Form.Item label="Supported Message Triggers">
+                                <Select mode='multiple' options={message_triggers_options} onChange={(value) => UpdateModelAttributes(index, 'hl7_triggers', value)} />
+                            </Form.Item>
                         </Card>
                     ))
                 }
-            </div>
 
-            <div className='create-channel-buttons-container'>
-                <Button type='primary' style={{ backgroundColor: '#4CAF50' }} onClick={CreateChannel}>Create Channel</Button>
-                <Button type='primary' style={{ backgroundColor: '#F44336' }} onClick={() => setCreateNewChannel(false)}>Cancel</Button>
-            </div>
+                <div className='create-channel-buttons-container'>
+                    <Button type="primary" htmlType="submit" style={{ backgroundColor: '#4CAF50' }} >Create Channel</Button>
+                    <Button type='primary' style={{ backgroundColor: '#F44336' }} onClick={() => setCreateNewChannel(false)}>Cancel</Button>
+                </div>
+            </Form>
+
         </div>
     )
 }

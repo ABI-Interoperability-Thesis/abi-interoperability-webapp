@@ -9,6 +9,8 @@ import { Typography, Table, Tabs, Button, notification } from 'antd'
 const app_env = process.env.REACT_APP_ENV
 const mirth_endpoint = endpoints['mirth-api'][app_env]
 const preprocessor_endpoint = endpoints['preprocessor-ws'][app_env]
+const mysql_endpoint = endpoints['mysql-ws'][app_env]
+
 const { Title } = Typography
 
 const Channels = () => {
@@ -185,7 +187,7 @@ const Channels = () => {
             <Button type='primary' style={{ backgroundColor: '#4CAF50' }} onClick={() => setCreateNewChannel(true)}>New Channel</Button>
           </>)
           :
-          (<CreateChannel setCreateNewChannel={setCreateNewChannel} mirth_endpoint={mirth_endpoint} preprocessor_endpoint={preprocessor_endpoint} />)
+          (<CreateChannel setCreateNewChannel={setCreateNewChannel} mirth_endpoint={mirth_endpoint} preprocessor_endpoint={preprocessor_endpoint} mysql_endpoint={mysql_endpoint}/>)
 
       }
     </>
