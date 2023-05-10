@@ -3,6 +3,7 @@ import { Button, Layout, Menu, theme } from 'antd';
 import { useState } from 'react';
 import Dashboard from './Components/Dashboard/index';
 import Requests from './Components/Requests/index';
+import RequestDetails from './Components/RequestDetails/index';
 import Channels from './Components/Channels/index';
 import Models from './Components/Models/index';
 import ModelDetails from './Components/ModelDetails/index';
@@ -92,6 +93,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/requests" element={<Requests />} />
+            <Route path="/requests/:req_id" element={<RequestDetails />} />
             <Route path="/channels" element={<Channels />} />
             <Route path="/models" element={<Models />} />
             <Route path="/models/:model_id" element={<ModelDetails />} />
@@ -99,6 +101,7 @@ const App = () => {
             <Route path="/clients/:client_id" element={<ClientDetails />} />
             <Route path="/attribute-mappings" element={<AttributeMappings />} />
             <Route path="/about" element={<About />} />
+            
           </Routes>
         </Content>
       </Layout>

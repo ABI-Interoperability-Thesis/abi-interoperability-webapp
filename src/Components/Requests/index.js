@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Popconfirm,Typography } from 'antd'
+import { Table, Button, Popconfirm, Typography } from 'antd'
 import axios from 'axios'
 import { CheckCircleOutlined, QuestionCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import endpoints from '../config/endpoints.json'
 import './index.css'
+import { Link } from 'react-router-dom';
 
 const { Title } = Typography;
 
@@ -17,6 +18,7 @@ const Requests = () => {
     const GetAllRequests = async () => {
         const url = `${mysql_endpoint}/api/requests`
         const response = await axios.get(url)
+        console.log(response.data)
         setData(response.data)
     }
 
@@ -51,7 +53,9 @@ const Requests = () => {
                             Delete
                         </Button>
                     </Popconfirm>
-                    <Button type='primary'>Inspect</Button>
+                    <Link to={`/requests/${record.model_data_id}`}>
+                        <Button type='primary'>Inspect</Button>
+                    </Link>
                 </div>
             ),
         }

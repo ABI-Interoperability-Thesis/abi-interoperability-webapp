@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios'
 import endpoints from '../config/endpoints.json'
 import { Button, Typography, Collapse } from 'antd'
-import { Link } from 'react-router-dom'
 import './index.css'
 const { Title } = Typography;
 const { Panel } = Collapse;
@@ -56,7 +55,6 @@ const ModelDetails = () => {
             <Link to='/models'>
                 <Button type='primary' style={{ backgroundColor: '#F44336', marginTop: '1rem' }}>Back to Models</Button>
             </Link>
-
         </>
     )
 }
