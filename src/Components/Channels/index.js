@@ -184,7 +184,7 @@ const Channels = () => {
         !createNewChannel ?
           (<>
             <Tabs defaultActiveKey="1" items={items} />
-            <Button type='primary' style={{ backgroundColor: '#4CAF50' }} onClick={() => setCreateNewChannel(true)}>New Channel</Button>
+            <Button type='primary' style={{ backgroundColor: '#4CAF50', marginTop: '1rem' }} onClick={() => setCreateNewChannel(true)}>New Channel</Button>
           </>)
           :
           (<CreateChannel setCreateNewChannel={setCreateNewChannel} mirth_endpoint={mirth_endpoint} preprocessor_endpoint={preprocessor_endpoint} mysql_endpoint={mysql_endpoint}/>)

@@ -16,6 +16,7 @@ const CreateNew = (props) => {
     const onFinish = (values) => {
         console.log('Received values of form:', values);
         CreateModel(values)
+        setCreateNew(false)
     };
 
     const CreateModel = async (data) => {

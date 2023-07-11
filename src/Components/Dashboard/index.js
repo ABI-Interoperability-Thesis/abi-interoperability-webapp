@@ -16,13 +16,10 @@ const Dashboard = () => {
                     <Statistic title="Total Requests" value={10000} formatter={formatter} />
                 </Card>
                 <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Statistic title="Total Requests" value={10000} formatter={formatter} valueStyle={{ color: '#FF9800' }} />
+                    <Statistic title="Total Unanswered Requests" value={10000} formatter={formatter} valueStyle={{ color: '#FF9800' }} />
                 </Card>
                 <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Statistic title="Total Requests" value={10000} formatter={formatter} valueStyle={{ color: '#4CAF50' }}/>
-                </Card>
-                <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Statistic title="Total Requests" value={10000} formatter={formatter} valueStyle={{ color: '#F44336' }}/>
+                    <Statistic title="Total AnsweredRequests" value={10000} formatter={formatter} valueStyle={{ color: '#4CAF50' }}/>
                 </Card>
             </div>
 

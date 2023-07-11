@@ -19,7 +19,22 @@ const Requests = () => {
         const url = `${mysql_endpoint}/api/requests`
         const response = await axios.get(url)
         console.log(response.data)
+
+        response.data.forEach(obj => {
+            obj['created_date_formatted'] = GetDateFromTimeStamp(obj['created_date']);
+          });
+
         setData(response.data)
+    }
+
+    const GetDateFromTimeStamp = (created_date) => {
+        const date = new Date(created_date);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        const formattedDate = `${year}-${month}-${day}`
+        return formattedDate
     }
 
     const DeleteRequest = async (request_type, request_id) => {
@@ -37,6 +52,7 @@ const Requests = () => {
         { title: 'Answered', key: 'answered', render: (obj) => (obj.answered ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <QuestionCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
         { title: 'Answer', dataIndex: 'answer', key: 'answer' },
         { title: 'Client', dataIndex: 'client_id', key: 'client_id' },
+        { title: 'Created', dataIndex: 'created_date_formatted', key: 'created_date_formatted', sorter: (a, b) => a.created_date - b.created_date, },
         {
             title: 'Actions',
             key: 'action',

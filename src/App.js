@@ -10,9 +10,12 @@ import ModelDetails from './Components/ModelDetails/index';
 import Clients from './Components/Clients/index';
 import ClientDetails from './Components/ClientDetails/index';
 import AttributeMappings from './Components/AttributeMappings/index';
+import AttributeMappingDetails from './Components/AttributeMappings/AttributeMappingDetails/index';
 import About from './Components/About/index';
+import Validations from './Components/Validations/index'
+import Preprocessors from './Components/Preprocessors/index'
 
-import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined, TeamOutlined, MonitorOutlined, QuestionOutlined } from '@ant-design/icons'
+import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined, TeamOutlined, MonitorOutlined, QuestionOutlined, ReadOutlined, CheckCircleOutlined, CalculatorOutlined } from '@ant-design/icons'
 import SVGS from './svgs.js'
 import './index.css'
 
@@ -51,6 +54,17 @@ const App = () => {
           </Menu.Item>
           <Menu.Item key={'/attribute-mappings'} icon={<MonitorOutlined />}>
             <Link to={'/attribute-mappings'}>Attribute Mappings</Link>
+          </Menu.Item>
+          <Menu.Item key={'/validations'} icon={<CheckCircleOutlined />}>
+            <Link to={'/validators'}>Validators</Link>
+          </Menu.Item>
+          <Menu.Item key={'/preprocessors'} icon={<CalculatorOutlined />}>
+            <Link to={'/preprocessors'}>Preprocessors</Link>
+          </Menu.Item>
+          <Menu.Item key={'/hl7-docs'} icon={<ReadOutlined />}>
+            <a href="https://hl7-definition.caristix.com/v2/HL7v2.5.1" target="_blank" rel="noopener noreferrer">
+              HL7 Docs
+            </a>
           </Menu.Item>
           <Menu.Item key={'/about'} icon={<QuestionOutlined />}>
             <Link to={'/about'}>About</Link>
@@ -100,8 +114,12 @@ const App = () => {
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:client_id" element={<ClientDetails />} />
             <Route path="/attribute-mappings" element={<AttributeMappings />} />
+            <Route path="/attribute-mappings/:model_name/:model_attribute" element={<AttributeMappingDetails />} />
             <Route path="/about" element={<About />} />
+            <Route path="/validators" element={<Validations />} />
+            <Route path="/preprocessors" element={<Preprocessors />} />
             
+
           </Routes>
         </Content>
       </Layout>

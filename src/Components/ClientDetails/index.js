@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import axios from 'axios'
 import endpoints from '../config/endpoints.json'
-import { Typography, Descriptions, Button, Modal } from 'antd'
+import { Typography, Descriptions, Button, Modal, Card, Tabs } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
-
+import ClientAccessControl from './ClientAccessControl'
+import ClientCustomMappings from './ClientCustomMappings'
 const { Title, Paragraph } = Typography
 const app_env = process.env.REACT_APP_ENV
 const mysql_endpoint = endpoints['mysql-ws'][app_env]
@@ -13,6 +14,8 @@ const ClientDetails = () => {
   const { client_id } = useParams();
   const [clientData, setClientData] = useState({})
   const [confirmVisible, setConfirmVisible] = useState(false);
+
+
 
   const GetClientData = async () => {
     const url = `${mysql_endpoint}/api/clients/${client_id}`
@@ -25,7 +28,6 @@ const ClientDetails = () => {
 
   useEffect(() => {
     GetClientData()
-
   }, [])
 
   const DeleteClient = async () => {
@@ -34,9 +36,33 @@ const ClientDetails = () => {
     const config = { method, url }
     await axios(config)
 
-    navigate('/clients');
+    navigate('/clients')
     setConfirmVisible(false);
   }
+
+  const tabItems = [
+    {
+      key: '1',
+      label: `Access Control`,
+      children: (
+        <ClientAccessControl endpoint={mysql_endpoint} client_id={client_id} clientData={clientData}/>
+      ),
+    },
+    {
+      key: '2',
+      label: `Custom Mappings`,
+      children: (
+        <ClientCustomMappings endpoint={mysql_endpoint} client_id={client_id} />
+      ),
+    },
+    {
+      key: '3',
+      label: `Client Requests`,
+      children: (
+        <>Client Requests</>
+      ),
+    }
+  ]
 
 
   return (
@@ -55,6 +81,10 @@ const ClientDetails = () => {
         </Descriptions.Item>
         <Descriptions.Item label="Remark">empty</Descriptions.Item>
       </Descriptions>
+
+      <Title level={2}>Model Interactions</Title>
+      <Tabs defaultActiveKey="1" items={tabItems} />
+
       <Modal
         title="Are you sure you want to delete this client?"
         visible={confirmVisible}
