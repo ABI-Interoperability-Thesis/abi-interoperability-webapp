@@ -62,6 +62,7 @@ const Validations = () => {
     const columns = [
         { title: 'Name', dataIndex: 'validation_name', key: 'validation_name' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
+        { title: 'Documentation Description', dataIndex: 'doc_description', key: 'doc_description' },
         { title: 'Validation Expression', dataIndex: 'validation_expression', key: 'validation_expression' },
         {
             title: 'Actions',

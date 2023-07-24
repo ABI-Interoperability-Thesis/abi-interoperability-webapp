@@ -11,6 +11,9 @@ const mysql_endpoint = endpoints['mysql-ws'][app_env]
 const ModelFeatures = (props) => {
     const model_id = props.model_id
     const model = props.model
+    const deployed = props.deployed
+    const GetModelConfigs = props.GetModelConfigs
+
     const [modelAttributes, setModelAttributes] = useState([]);
 
     const GetModelAttributes = async () => {
@@ -26,11 +29,13 @@ const ModelFeatures = (props) => {
     return (
         <>
             <Title level={3}>Model Attributes</Title>
+            <div style={{display: "flex", gap: "1rem", flexDirection: "column"}}>
             {
                 modelAttributes.map((item) => (
-                   <AttributeCard model={model} model_id={model_id} endpoint={mysql_endpoint} data={item}/>
+                   <AttributeCard GetModelConfigs={GetModelConfigs} deployed={deployed} model={model} model_id={model_id} endpoint={mysql_endpoint} data={item}/>
                 ))
             }
+            </div>
         </>
     )
 }

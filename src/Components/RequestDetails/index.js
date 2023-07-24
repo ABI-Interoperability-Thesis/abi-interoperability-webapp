@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import endpoints from '../config/endpoints.json'
 import { Button, Typography, Descriptions } from 'antd'
 
-const { Title } = Typography
+const { Title, Paragraph } = Typography
 
 const app_env = process.env.REACT_APP_ENV
 const mysql_endpoint = endpoints['mysql-ws'][app_env]
@@ -34,14 +34,33 @@ const RequestDetails = () => {
   const { req_id } = useParams();
   return (
     <div>
-      <Title level={2}>{requestInfo.request_type}</Title>
-      <Title level={4}>Answered: {requestInfo.answered}</Title>
-      <Title level={4}>Answer: {requestInfo.answer}</Title>
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <Title style={{ margin: 0 }} level={3}>Requested Model</Title>
+        <Paragraph style={{ margin: 0 }}>
+          <pre>{requestInfo.request_type}</pre>
+        </Paragraph>
 
-      <Descriptions title="Literal Request" bordered style={{marginBottom: '2rem', marginTop: '1rem'}}>
+        <Title style={{ margin: 0 }} level={3}>State</Title>
+        <Paragraph style={{ margin: 0 }}>
+          <pre style={{ backgroundColor: requestInfo.answered ? '#4CAF50' : '#F44336', color: "#ffffff" }}>{requestInfo.answered ? 'Answered' : 'Not Answered'}</pre>
+        </Paragraph>
+
+        <Title style={{ margin: 0 }} level={3}>Answer</Title>
+        <Paragraph style={{ margin: 0 }}>
+          <pre>{requestInfo.answer}</pre>
+        </Paragraph>
+      </div>
+
+
+      <Descriptions title="Literal Request" bordered style={{ marginBottom: '2rem', marginTop: '1rem' }}>
         {
           Object.keys(requestLiteralInfo).map((json_key) => (
-            <Descriptions.Item label={json_key}>{requestLiteralInfo[json_key]}</Descriptions.Item>
+            <>
+              {
+                json_key !== 'req_id' &&
+                <Descriptions.Item label={json_key}>{requestLiteralInfo[json_key]}</Descriptions.Item>
+              }
+            </>
           ))
         }
       </Descriptions>
@@ -49,7 +68,12 @@ const RequestDetails = () => {
       <Descriptions title="Preprocessed Request" bordered>
         {
           Object.keys(requestProcessedInfo).map((json_key) => (
-            <Descriptions.Item label={json_key}>{requestProcessedInfo[json_key]}</Descriptions.Item>
+            <>
+              {
+                json_key !== 'req_id' &&
+                <Descriptions.Item label={json_key}>{requestProcessedInfo[json_key]}</Descriptions.Item>
+              }
+            </>
           ))
         }
       </Descriptions>

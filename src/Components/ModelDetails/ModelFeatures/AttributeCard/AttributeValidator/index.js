@@ -9,6 +9,9 @@ const AttributeValidator = (props) => {
     const model = props.model
     const attribute_name = props.attribute_name
     const endpoint = props.endpoint
+    const openNotification = props.openNotification
+    const deployed = props.deployed
+    const GetModelConfigs = props.GetModelConfigs
 
     const [validator, setValidator] = useState()
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,21 +92,28 @@ const AttributeValidator = (props) => {
 
         const axios_response = await axios(config)
         CheckValidator()
+        GetModelConfigs()
 
     }
 
     const DeleteValidation = async () => {
-        const validation_id = validator.validation_id
+        if (!deployed) {
+            const validation_id = validator.validation_id
 
-        const config ={ 
-            method: 'delete',
-            url: `${endpoint}/api/model-validations/${validation_id}`
+            const config = {
+                method: 'delete',
+                url: `${endpoint}/api/model-validations/${validation_id}`
+            }
+
+            await axios(config)
+            setValidator()
+            CheckValidator()
+            GetModelConfigs()
+        } else {
+            const message = 'Unable to Delete Validator!'
+            const description = 'While the model is deployed Validators cannot be deleted.'
+            openNotification(message, description)
         }
-
-        await axios(config)
-        setValidator()
-        CheckValidator()
-
 
     }
 
@@ -122,6 +132,11 @@ const AttributeValidator = (props) => {
                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                     <Title style={{ margin: 0 }} level={5}>Description </Title>
                                     <pre>{validator.description}</pre>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <Title style={{ margin: 0 }} level={5}>Documentation Description</Title>
+                                    <pre>{validator.doc_description}</pre>
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>

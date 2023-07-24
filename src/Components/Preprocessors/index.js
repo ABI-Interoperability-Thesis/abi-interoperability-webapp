@@ -62,6 +62,7 @@ const Preprocessors = () => {
     const columns = [
         { title: 'Preprocessor Name', dataIndex: 'preprocessor_name', key: 'preprocessor_name' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
+        { title: 'Documentation Description', dataIndex: 'doc_description', key: 'doc_description' },
         { title: 'Preprocessor Script', dataIndex: 'preprocessor_script', key: 'preprocessor_script' },
         {
             title: 'Actions',

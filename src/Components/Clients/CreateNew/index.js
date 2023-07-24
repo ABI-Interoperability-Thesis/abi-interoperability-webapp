@@ -46,6 +46,10 @@ const CreateNewClient = (props) => {
                     <Input placeholder="Client contact" />
                 </Form.Item>
 
+                <Form.Item label="Password" name='password'>
+                    <Input.Password placeholder="Client contact" />
+                </Form.Item>
+
 
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <Button type="primary" htmlType="submit" style={{ backgroundColor: '#4CAF50' }} >Create Client</Button>

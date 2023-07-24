@@ -1,31 +1,127 @@
-import React from 'react'
-import { Card, Typography, Statistic } from 'antd';
+import React, { useEffect, useState } from 'react'
+import { Card, Typography, Statistic, Table, Button } from 'antd';
+import { Link } from 'react-router-dom';
 import CountUp from 'react-countup';
+import endpoints from '../../Components/config/endpoints.json'
+import axios from 'axios'
+import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
 
 import './index.css'
 const formatter = (value) => <CountUp end={value} separator="," />;
 
 const { Title } = Typography;
+const app_env = process.env.REACT_APP_ENV
+const mysql_endpoint = endpoints['mysql-ws'][app_env]
 
 const Dashboard = () => {
+    const [requestsInfo, setRequestsInfo] = useState({})
+    const [requestsInfoByModel, setRequestsInfoByModel] = useState([])
+    const [modelConfigs, setModelConfigs] = useState([])
+    const [issueInfobyClient, setIssueInfobyClient] = useState([])
+
+    const GetAllRequestsInfo = async () => {
+        const url = `${mysql_endpoint}/api/dash-requests`
+        const method = 'get'
+        const config = { method, url }
+        const axios_response = await axios(config)
+        const req_data = axios_response.data
+        setRequestsInfo(req_data)
+    }
+
+    const GetAllRequestsInfoByModel = async () => {
+        const url = `${mysql_endpoint}/api/dash-requests-by-model`
+        const method = 'get'
+        const config = { method, url }
+        const axios_response = await axios(config)
+        const req_data = axios_response.data
+        setRequestsInfoByModel(req_data)
+    }
+
+    const GetModelConfigs = async () => {
+        const url = `${mysql_endpoint}/api/dash-model-config`
+        const method = 'get'
+        const config = { method, url }
+        const axios_response = await axios(config)
+        const req_data = axios_response.data
+        setModelConfigs(req_data)
+    }
+
+    const GetIssueInfoByClient = async () => {
+        const url = `${mysql_endpoint}/api/issues-info`
+        const method = 'get'
+        const config = { method, url }
+        const axios_response = await axios(config)
+        const req_data = axios_response.data
+        setIssueInfobyClient(req_data)
+    }
+
+    useEffect(() => {
+        GetAllRequestsInfo()
+        GetAllRequestsInfoByModel()
+        GetModelConfigs()
+        GetIssueInfoByClient()
+    }, [])
+
+    const columns = [
+        { title: 'Model Name', dataIndex: 'model_name', key: 'model_name' },
+        { title: 'Total Requests', dataIndex: 'total_requests', key: 'total_requests' },
+        { title: 'Total Answered Requests', dataIndex: 'answered_requests', key: 'answered_requests' },
+        { title: 'Total Unanswered Requests', dataIndex: 'unanswered_requests', key: 'unanswered_requests' },
+    ]
+
+    const columns_configs = [
+        { title: 'Model Name', dataIndex: 'model_name', key: 'model_name' },
+        { title: 'Description', dataIndex: 'description', key: 'description' },
+        { title: 'Deployed', key: 'deployed', render: (obj) => (obj.deployed ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
+        { title: 'Attributes', dataIndex: 'attribute_count', key: 'attribute_count' },
+        { title: 'Default Mappings', dataIndex: 'default_mappings', key: 'default_mappings' },
+        { title: 'Validators', dataIndex: 'model_validations', key: 'model_validations' },
+        { title: 'Preprocessors', dataIndex: 'model_preprocessors', key: 'model_preprocessors' },
+        { title: 'Deploy Ready', key: 'configured', render: (obj) => (obj.configured ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
+        {
+            title: 'Actions',
+            key: 'action',
+            render: (text, record) => (
+                <div>
+                    <Link to={`/models/${record.model_id}`}>
+                        <Button type='primary'>
+                            Inspect
+                        </Button>
+                    </Link>
+                </div>
+            ),
+        }
+    ]
+
+    const issue_columns = [
+        { title: 'Client Name', dataIndex: 'client_name', key: 'client_name' },
+        { title: 'Open Issues', dataIndex: 'open_issues', key: 'open_issues' },
+        { title: 'Closed Issues', dataIndex: 'closed_issues', key: 'closed_issues' },
+    ]
+
     return (
         <>
             <Title level={2}>Request Information</Title>
             <div className='req-info-container'>
                 <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Statistic title="Total Requests" value={10000} formatter={formatter} />
+                    <Statistic title="Total Requests" value={requestsInfo['total_requests']} formatter={formatter} />
                 </Card>
                 <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Statistic title="Total Unanswered Requests" value={10000} formatter={formatter} valueStyle={{ color: '#FF9800' }} />
+                    <Statistic title="Total Unanswered Requests" value={requestsInfo['unanswered_requests']} formatter={formatter} valueStyle={{ color: '#FF9800' }} />
                 </Card>
                 <Card bordered={false} style={{ width: '15rem', justifyContent: 'center' }}>
-                    <Statistic title="Total AnsweredRequests" value={10000} formatter={formatter} valueStyle={{ color: '#4CAF50' }}/>
+                    <Statistic title="Total AnsweredRequests" value={requestsInfo['answered_requests']} formatter={formatter} valueStyle={{ color: '#4CAF50' }} />
                 </Card>
             </div>
 
-            <Title level={2}>Requests by Model</Title>
+            <Title level={2}>Model Requests</Title>
+            <Table dataSource={requestsInfoByModel} columns={columns} />
 
-            <Title level={2}>Requests Over Time</Title>
+            <Title level={2}>Models Configuration</Title>
+            <Table dataSource={modelConfigs} columns={columns_configs} />
+
+            <Title level={2}>Client Issues</Title>
+            <Table dataSource={issueInfobyClient} columns={issue_columns} />
         </>
     )
 }

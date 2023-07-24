@@ -10,6 +10,10 @@ const AttributePreprocessor = (props) => {
     const model = props.model
     const attribute_name = props.attribute_name
     const endpoint = props.endpoint
+    const openNotification = props.openNotification
+    const deployed = props.deployed
+    const GetModelConfigs = props.GetModelConfigs
+    
 
     const [preprocessor, setPreprocessor] = useState()
     const [edit, setEdit] = useState(false)
@@ -40,16 +44,23 @@ const AttributePreprocessor = (props) => {
     }
 
     const DeletePreprocessor = async () => {
-        const processing_id = preprocessor.preprocessor_id
+        if (!deployed) {
+            const processing_id = preprocessor.preprocessor_id
 
-        const config ={ 
-            method: 'delete',
-            url: `${endpoint}/api/model-preprocessors/${processing_id}`
+            const config = {
+                method: 'delete',
+                url: `${endpoint}/api/model-preprocessors/${processing_id}`
+            }
+
+            await axios(config)
+            setPreprocessor()
+            CheckPreprocessor()
+            GetModelConfigs()
+        } else {
+            const message = 'Unable to Delete Preprocessor!'
+            const description = 'While the model is deployed Preprocessors cannot be deleted.'
+            openNotification(message, description)
         }
-
-        await axios(config)
-        setPreprocessor()
-        CheckPreprocessor()
     }
 
     const showModal = () => {
@@ -68,15 +79,15 @@ const AttributePreprocessor = (props) => {
     }, [])
 
     const CreatePreprocessor = async (values) => {
-        const req_data = { 
+        const req_data = {
             model_id: model_id,
             model_name: model,
             field: attribute_name,
             preprocessor_name: preprocessingName
         }
 
-        if(preprocessingScript !== undefined) req_data['preprocessor_script'] = preprocessingScript
-        if(description !== undefined) req_data['description'] = description
+        if (preprocessingScript !== undefined) req_data['preprocessor_script'] = preprocessingScript
+        if (description !== undefined) req_data['description'] = description
 
         const config = {
             method: 'post',
@@ -86,6 +97,7 @@ const AttributePreprocessor = (props) => {
 
         const axios_response = await axios(config)
         CheckPreprocessor()
+        GetModelConfigs()
 
     }
 
@@ -97,16 +109,16 @@ const AttributePreprocessor = (props) => {
 
         const axios_response = await axios(config)
 
-        const treated = axios_response.data.map((item)=>{
+        const treated = axios_response.data.map((item) => {
             return {
                 label: item.preprocessor_name,
                 value: item.preprocessor_name,
             }
         })
 
-        treated.push({label:'custom', value:'custom'})
+        treated.push({ label: 'custom', value: 'custom' })
         setPreprocessingOptions(treated)
-        
+
     }
 
     return (
@@ -124,6 +136,11 @@ const AttributePreprocessor = (props) => {
                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                     <Title style={{ margin: 0 }} level={5}>Description </Title>
                                     <pre>{preprocessor.description}</pre>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <Title style={{ margin: 0 }} level={5}>Documentation Description </Title>
+                                    <pre>{preprocessor.doc_description}</pre>
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
@@ -159,8 +176,8 @@ const AttributePreprocessor = (props) => {
                                 {
                                     preprocessingName === 'custom' &&
                                     <>
-                                        <TextArea rows={4} placeholder="Write your preprocessor logic here" onChange={(e)=>{setPreprocessingScript(e.target.value)}}/>
-                                        <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e)=>{setDescription(e.target.value)}}/>
+                                        <TextArea rows={4} placeholder="Write your preprocessor logic here" onChange={(e) => { setPreprocessingScript(e.target.value) }} />
+                                        <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e) => { setDescription(e.target.value) }} />
                                     </>
                                 }
                                 <Button type='primary' htmlType='submit'>Create Preprocessor</Button>

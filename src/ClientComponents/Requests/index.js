@@ -1,38 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Popconfirm, Typography } from 'antd'
-import axios from 'axios'
+import endpoints from '../../Components/config/endpoints.json'
+import { Table, Button, Popconfirm, Typography, Input, Card } from 'antd'
 import { CheckCircleOutlined, QuestionCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
-import endpoints from '../config/endpoints.json'
-import './index.css'
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
+import axios from 'axios'
 
-const { Title } = Typography;
+const { Paragraph, Title } = Typography;
 
 const app_env = process.env.REACT_APP_ENV
 const mysql_endpoint = endpoints['mysql-ws'][app_env]
 
-
 const Requests = () => {
-    const [data, setData] = useState([]);
 
-    const GetAllRequests = async () => {
-        const url = `${mysql_endpoint}/api/requests`
-        const method ='get'
+    const [requests, setRequests] = useState()
+
+    const GetClientRequests = async () => {
+        const url = `${mysql_endpoint}/auth/requests`
+        const method = 'get'
         const headers = {
             'session-token': localStorage.getItem('session-token')
         }
-
-        const config = {method, url, headers}
-
+        const config = { method, url, headers }
         const response = await axios(config)
-
-        console.log(response.data)
 
         response.data.forEach(obj => {
             obj['created_date_formatted'] = GetDateFromTimeStamp(obj['created_date']);
         });
 
-        setData(response.data)
+        setRequests(response.data)
     }
 
     const GetDateFromTimeStamp = (created_date) => {
@@ -45,21 +40,26 @@ const Requests = () => {
         return formattedDate
     }
 
+    useEffect(() => {
+        GetClientRequests()
+    }, [])
+
+    const handleDelete = (record) => {
+        console.log(`Deleting ${JSON.stringify(record)}`)
+        DeleteRequest(record.request_type, record.model_data_id)
+
+    };
+
     const DeleteRequest = async (request_type, request_id) => {
         const url = `${mysql_endpoint}/api/request/${request_type}/${request_id}`
         await axios.delete(url)
-        GetAllRequests()
+        GetClientRequests()
     }
-
-    useEffect(() => {
-        GetAllRequests()
-    }, []);
 
     const columns = [
         { title: 'Request Type', dataIndex: 'request_type', key: 'request_type' },
         { title: 'Answered', key: 'answered', render: (obj) => (obj.answered ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <QuestionCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
         { title: 'Answer', dataIndex: 'answer', key: 'answer' },
-        { title: 'Client', dataIndex: 'client_name', key: 'client_name' },
         { title: 'Created', dataIndex: 'created_date_formatted', key: 'created_date_formatted', sorter: (a, b) => a.created_date - b.created_date, },
         {
             title: 'Actions',
@@ -85,16 +85,10 @@ const Requests = () => {
         }
     ]
 
-    const handleDelete = (record) => {
-        console.log(`Deleting ${JSON.stringify(record)}`)
-        DeleteRequest(record.request_type, record.model_data_id)
-
-    };
-
     return (
         <>
-            <Title level={2}>Client Requests</Title>
-            <Table dataSource={data} columns={columns} />
+            <Title level={2}>Requests</Title>
+            <Table dataSource={requests} columns={columns} />
         </>
     )
 }

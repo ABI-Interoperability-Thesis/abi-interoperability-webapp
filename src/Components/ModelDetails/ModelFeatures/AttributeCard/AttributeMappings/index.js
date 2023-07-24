@@ -9,6 +9,11 @@ const AttributeMappings = (props) => {
     const model = props.model
     const attribute_name = props.attribute_name
     const endpoint = props.endpoint
+    const deployed = props.deployed
+    const openNotification = props.openNotification
+    const GetModelConfigs = props.GetModelConfigs
+    
+
     const [hasDefaultMapping, setHasDefaultMapping] = useState(false)
     const [defaultMapping, setDefaultMapping] = useState({})
     const [loading, setLoading] = useState(true)
@@ -16,7 +21,7 @@ const AttributeMappings = (props) => {
     const [edit, setEdit] = useState(false)
     const [messageType, setMessageType] = useState()
 
-    
+
 
     //HL7 Data
     const [hl7MessageTypes, setHl7MessageTypes] = useState([])
@@ -112,7 +117,7 @@ const AttributeMappings = (props) => {
     }
 
     const CreateDefaultMapping = async (values) => {
-        if(values.msg_subfield === undefined) values.msg_subfield = values.msg_field + '.1'
+        if (values.msg_subfield === undefined) values.msg_subfield = values.msg_field + '.1'
         const joined_mapping = `msg["${values.msg_segment}"]["${values.msg_field}"]["${values.msg_subfield}"]`
         const req_data = {
             client_id: 'Default',
@@ -142,16 +147,25 @@ const AttributeMappings = (props) => {
 
         console.log(axios_response)
         CheckDefaultMapping()
+        GetModelConfigs()
     }
 
     const DeleteMapping = async () => {
-        const config = {
-            method: 'delete',
-            url: `${endpoint}/api/client-mappings/${defaultMapping.mapping_id}`
+        if (!deployed) {
+            const config = {
+                method: 'delete',
+                url: `${endpoint}/api/client-mappings/${defaultMapping.mapping_id}`
+            }
+
+            await axios(config)
+            CheckDefaultMapping()
+            GetModelConfigs()
+        }else{
+            const message = 'Unable to Delete Mapping!'
+            const description = 'While the model is deployed Default Mappings cannot be deleted.'
+            openNotification(message, description)
         }
 
-        await axios(config)
-        CheckDefaultMapping()
     }
 
     const ParseMapping = (mapping) => {
@@ -345,7 +359,7 @@ const AttributeMappings = (props) => {
                                     filterOption={(input, option) =>
                                         (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                     }
-                                    onChange={(value)=> setMessageType(value)}
+                                    onChange={(value) => setMessageType(value)}
                                     options={hl7MessageTypes}
                                 />
                             </Form.Item>
@@ -355,7 +369,7 @@ const AttributeMappings = (props) => {
                                 <Form.Item
                                     label="Observation ID"
                                     name="mapping_id">
-                                        <Input />
+                                    <Input />
                                 </Form.Item>
                             }
 
