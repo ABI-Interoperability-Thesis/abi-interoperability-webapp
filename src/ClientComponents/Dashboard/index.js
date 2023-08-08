@@ -5,7 +5,7 @@ import { Card, Typography, Statistic, Table, Button } from 'antd';
 import CountUp from 'react-countup';
 
 const app_env = process.env.REACT_APP_ENV
-const mysql_endpoint = endpoints['mysql-ws'][app_env]
+const mysql_endpoint = process.env.REACT_APP_MYSQL_SERVICE_ENDPOINT
 const { Title } = Typography;
 const formatter = (value) => <CountUp end={value} separator="," />;
 

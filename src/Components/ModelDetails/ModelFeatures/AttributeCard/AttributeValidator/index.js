@@ -19,7 +19,8 @@ const AttributeValidator = (props) => {
     const [validationOptions, setValidationOptions] = useState()
     const [validationRegex, setValidationRegex] = useState()
     const [description, setDescription] = useState()
-
+    const [docDescription, setDocDescription] = useState()
+    
 
 
     const CheckValidator = async () => {
@@ -83,7 +84,10 @@ const AttributeValidator = (props) => {
 
         if (validationRegex !== undefined) req_data['validation_expression'] = validationRegex
         if (description !== undefined) req_data['description'] = description
+        if (docDescription !== undefined) req_data['doc_description'] = docDescription
 
+        console.log(req_data)
+        
         const config = {
             method: 'post',
             url: `${endpoint}/api/model-validations`,
@@ -172,12 +176,13 @@ const AttributeValidator = (props) => {
 
                                 {
                                     validationName === 'custom' &&
-                                    <>
+                                    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
                                         <TextArea rows={4} placeholder="Write your validation Regular Expression here" onChange={(e) => { setValidationRegex(e.target.value) }} />
                                         <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDescription(e.target.value) }} />
-                                    </>
+                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDocDescription(e.target.value) }} />
+                                    </div>
                                 }
-                                <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
+                                <Button type='primary' htmlType='submit'>Create Validator</Button>
                             </Form>
                         </>
                     )

@@ -1,6 +1,8 @@
-import { Link, Routes, Route, useLocation } from 'react-router-dom'
+import { Link, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { Button, Layout, Menu, theme, Typography } from 'antd';
 import { useState, useEffect } from 'react';
+
+// Admin Components
 import Dashboard from './Components/Dashboard/index';
 import Requests from './Components/Requests/index';
 import RequestDetails from './Components/RequestDetails/index';
@@ -17,8 +19,10 @@ import Preprocessors from './Components/Preprocessors/index'
 import Login from './Components/Login/index'
 import Issues from './Components/Issues/index'
 import IssueDetailsAdmin from './Components/IssueDetails/index'
+import ChannelDetails from './Components/Channels/ChannelDetails/index.js'
 
 
+// Client Components
 import ClientAccountSettings from './ClientComponents/AccountSettings'
 import ClientIssues from './ClientComponents/ClientIssues'
 import IssueDetails from './ClientComponents/ClientIssues/IssueDetails'
@@ -29,7 +33,7 @@ import ClientModelDetails from './ClientComponents/ModelDetails/index';
 
 import endpoints from './Components/config/endpoints.json'
 import axios from 'axios'
-import { LoadingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined, TeamOutlined, MonitorOutlined, QuestionOutlined, ReadOutlined, CheckCircleOutlined, CalculatorOutlined } from '@ant-design/icons'
+import { LoadingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined, TeamOutlined, MonitorOutlined, QuestionOutlined, ReadOutlined, CheckCircleOutlined, CalculatorOutlined, CommentOutlined, SettingOutlined } from '@ant-design/icons'
 import SVGS from './svgs.js'
 import './index.css'
 
@@ -40,6 +44,7 @@ const mysql_endpoint = endpoints['mysql-ws'][app_env]
 
 const App = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -67,6 +72,7 @@ const App = () => {
       console.log(res_data.account_data)
       setCurrentAcc(res_data.account_data)
       setLoggedIn(true)
+      navigate('/')
       setLoading(false)
     } else {
       setLoggedIn(false)
@@ -114,24 +120,23 @@ const App = () => {
                             <Link to={'/models'}>Models</Link>
                           </Menu.Item>
 
+                          <Menu.Item key={'/issues'} icon={<CommentOutlined />}>
+                            <Link to={'/issues'}>Issues</Link>
+                          </Menu.Item>
+
                           <Menu.Item key={'/hl7-docs'} icon={<ReadOutlined />}>
                             <a href="https://hl7-definition.caristix.com/v2/HL7v2.5.1" target="_blank" rel="noopener noreferrer">
                               HL7 Docs
                             </a>
                           </Menu.Item>
-                          <Menu.Item key={'/about'} icon={<QuestionOutlined />}>
-                            <Link to={'/about'}>About</Link>
-                          </Menu.Item>
 
-                          <Menu.Item key={'/issues'} icon={<QuestionOutlined />}>
-                            <Link to={'/issues'}>Issues</Link>
-                          </Menu.Item>
-
-                          <Menu.Item key={'/account-settings'} icon={<QuestionOutlined />}>
+                          <Menu.Item key={'/account-settings'} icon={<SettingOutlined />}>
                             <Link to={'/account-settings'}>Account Settings</Link>
                           </Menu.Item>
 
-
+                          <Menu.Item key={'/about'} icon={<QuestionOutlined />}>
+                            <Link to={'/about'}>About</Link>
+                          </Menu.Item>
                         </Menu>
                       </Sider>
                       <Layout>
@@ -180,8 +185,7 @@ const App = () => {
                             <Route path="/requests/:req_id" element={<RequestDetails />} />
                             <Route path="/models" element={<ClientModels />} />
                             <Route path="/models/:model_id" element={<ClientModelDetails />} />
-                            <Route path="/attribute-mappings/:model_name/:model_attribute" element={<AttributeMappingDetails />} />
-                            
+                              <Route path="/attribute-mappings/:model_name/:model_attribute" element={<AttributeMappingDetails />} />
                           </Routes>
                         </Content>
                       </Layout>
@@ -222,7 +226,7 @@ const App = () => {
                           <Menu.Item key={'/preprocessors'} icon={<CalculatorOutlined />}>
                             <Link to={'/preprocessors'}>Preprocessors</Link>
                           </Menu.Item>
-                          <Menu.Item key={'/issues'} icon={<QuestionOutlined />}>
+                          <Menu.Item key={'/issues'} icon={<CommentOutlined />}>
                             <Link to={'/issues'}>Issues</Link>
                           </Menu.Item>
                           <Menu.Item key={'/hl7-docs'} icon={<ReadOutlined />}>
@@ -276,6 +280,7 @@ const App = () => {
                             <Route path="/requests" element={<Requests />} />
                             <Route path="/requests/:req_id" element={<RequestDetails />} />
                             <Route path="/channels" element={<Channels />} />
+                            <Route path="/channels/:channel_id" element={<ChannelDetails />} />
                             <Route path="/models" element={<Models />} />
                             <Route path="/models/:model_id" element={<ModelDetails />} />
                             <Route path="/clients" element={<Clients />} />
@@ -287,6 +292,7 @@ const App = () => {
                             <Route path="/preprocessors" element={<Preprocessors />} />
                             <Route path='/issues' element={<Issues />} />
                             <Route path="/issues/:issue_id" element={<IssueDetailsAdmin currentAcc={currentAcc} />} />
+
                           </Routes>
                         </Content>
                       </Layout>

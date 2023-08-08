@@ -7,7 +7,7 @@ import { Button, Typography, Descriptions } from 'antd'
 const { Title, Paragraph } = Typography
 
 const app_env = process.env.REACT_APP_ENV
-const mysql_endpoint = endpoints['mysql-ws'][app_env]
+const mysql_endpoint = process.env.REACT_APP_MYSQL_SERVICE_ENDPOINT
 
 
 const RequestDetails = () => {
@@ -52,7 +52,7 @@ const RequestDetails = () => {
       </div>
 
 
-      <Descriptions title="Literal Request" bordered style={{ marginBottom: '2rem', marginTop: '1rem' }}>
+      <Descriptions column={2} title="Literal Request" bordered style={{ marginBottom: '2rem', marginTop: '1rem' }}>
         {
           Object.keys(requestLiteralInfo).map((json_key) => (
             <>
@@ -65,7 +65,7 @@ const RequestDetails = () => {
         }
       </Descriptions>
 
-      <Descriptions title="Preprocessed Request" bordered>
+      <Descriptions column={2} title="Preprocessed Request" bordered>
         {
           Object.keys(requestProcessedInfo).map((json_key) => (
             <>

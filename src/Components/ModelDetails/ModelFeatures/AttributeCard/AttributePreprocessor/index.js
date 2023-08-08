@@ -21,6 +21,7 @@ const AttributePreprocessor = (props) => {
     const [preprocessingName, setPreprocessingName] = useState()
     const [preprocessingScript, setPreprocessingScript] = useState()
     const [description, setDescription] = useState()
+    const [docDescription, setDocDescription] = useState()
     const [preprocessingOptions, setPreprocessingOptions] = useState()
 
 
@@ -88,7 +89,8 @@ const AttributePreprocessor = (props) => {
 
         if (preprocessingScript !== undefined) req_data['preprocessor_script'] = preprocessingScript
         if (description !== undefined) req_data['description'] = description
-
+        if (docDescription !== undefined) req_data['doc_description'] = docDescription
+        
         const config = {
             method: 'post',
             url: `${endpoint}/api/model-preprocessors`,
@@ -175,10 +177,11 @@ const AttributePreprocessor = (props) => {
 
                                 {
                                     preprocessingName === 'custom' &&
-                                    <>
+                                    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
                                         <TextArea rows={4} placeholder="Write your preprocessor logic here" onChange={(e) => { setPreprocessingScript(e.target.value) }} />
                                         <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e) => { setDescription(e.target.value) }} />
-                                    </>
+                                        <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e) => { setDocDescription(e.target.value) }} />
+                                    </div>
                                 }
                                 <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
                             </Form>

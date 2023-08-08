@@ -5,7 +5,7 @@ import endpoints from '../config/endpoints.json'
 import axios from 'axios'
 
 const app_env = process.env.REACT_APP_ENV
-const mysql_endpoint = endpoints['mysql-ws'][app_env]
+const mysql_endpoint = process.env.REACT_APP_MYSQL_SERVICE_ENDPOINT
 
 const { Title } = Typography
 const {TextArea} = Input
@@ -111,6 +111,10 @@ const Validations = () => {
 
                             <Form.Item label="Validator Description" name='description'>
                                 <TextArea placeholder="Validator description" />
+                            </Form.Item>
+
+                            <Form.Item label="Validator Documentation Description" name='doc_description'>
+                                <TextArea placeholder="Validator documentation description" />
                             </Form.Item>
 
                             <Form.Item label="Validator Expression" name='validation_expression'>

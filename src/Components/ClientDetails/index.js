@@ -8,7 +8,7 @@ import ClientAccessControl from './ClientAccessControl'
 import ClientCustomMappings from './ClientCustomMappings'
 const { Title, Paragraph } = Typography
 const app_env = process.env.REACT_APP_ENV
-const mysql_endpoint = endpoints['mysql-ws'][app_env]
+const mysql_endpoint = process.env.REACT_APP_MYSQL_SERVICE_ENDPOINT
 const ClientDetails = () => {
   const navigate = useNavigate();
   const { client_id } = useParams();
@@ -45,7 +45,7 @@ const ClientDetails = () => {
       key: '1',
       label: `Access Control`,
       children: (
-        <ClientAccessControl endpoint={mysql_endpoint} client_id={client_id} clientData={clientData}/>
+        <ClientAccessControl endpoint={mysql_endpoint} client_id={client_id} clientData={clientData} />
       ),
     },
     {
@@ -53,13 +53,6 @@ const ClientDetails = () => {
       label: `Custom Mappings`,
       children: (
         <ClientCustomMappings endpoint={mysql_endpoint} client_id={client_id} />
-      ),
-    },
-    {
-      key: '3',
-      label: `Client Requests`,
-      children: (
-        <>Client Requests</>
       ),
     }
   ]
@@ -71,7 +64,7 @@ const ClientDetails = () => {
         <Title level={2} style={{ marginTop: '1rem', marginBottom: '1rem' }}>{clientData.name}</Title>
         <Button danger onClick={() => setConfirmVisible(true)}>Delete</Button>
       </div>
-      <Descriptions layout="horizontal">
+      <Descriptions bordered column={1}>
         <Descriptions.Item label="Name"><Paragraph>{clientData.name}</Paragraph></Descriptions.Item>
         <Descriptions.Item label="Contact"><Paragraph copyable>{clientData.phone}</Paragraph></Descriptions.Item>
         <Descriptions.Item label="Email"><Paragraph copyable>{clientData.email}</Paragraph></Descriptions.Item>

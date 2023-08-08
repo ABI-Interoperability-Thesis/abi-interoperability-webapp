@@ -5,7 +5,7 @@ import endpoints from '../config/endpoints.json'
 import axios from 'axios'
 
 const app_env = process.env.REACT_APP_ENV
-const mysql_endpoint = endpoints['mysql-ws'][app_env]
+const mysql_endpoint = process.env.REACT_APP_MYSQL_SERVICE_ENDPOINT
 
 const { Title } = Typography
 const {TextArea} = Input
@@ -111,6 +111,10 @@ const Preprocessors = () => {
 
                             <Form.Item label="Preprocessor Description" name='description'>
                                 <TextArea placeholder="Preprocessor description" />
+                            </Form.Item>
+
+                            <Form.Item label="Preprocessor Documentation Description" name='doc_description'>
+                                <TextArea placeholder="Preprocessor documentation description" />
                             </Form.Item>
 
                             <Form.Item label="Preprocessor Script" name='preprocessor_script'>
