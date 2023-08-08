@@ -1,35 +1,20 @@
-# Stage 1 - Building the React App
-FROM node:alpine as builder
+# Use an official Node.js runtime as the base image
+FROM node:alpine
+
+# Set the working directory inside the container
 WORKDIR /app
-COPY package.json .
+
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json ./
+
+# Install app dependencies
 RUN npm install
+
+# Copy the rest of the application code
 COPY . .
 
-ARG REACT_APP_ENV
-ENV REACT_APP_ENV $REACT_APP_ENV
+# Expose the port your app runs on
+EXPOSE 3000
 
-ARG REACT_APP_MYSQL_SERVICE_ENDPOINT
-ENV REACT_APP_MYSQL_SERVICE_ENDPOINT $REACT_APP_MYSQL_SERVICE_ENDPOINT
-
-ARG REACT_APP_MIRTH_SERVICE_ENDPOINT
-ENV REACT_APP_MIRTH_SERVICE_ENDPOINT $REACT_APP_MIRTH_SERVICE_ENDPOINT
-
-ARG REACT_APP_RABBITMQ_SERVICE_ENDPOINT
-ENV REACT_APP_RABBITMQ_SERVICE_ENDPOINT $REACT_APP_RABBITMQ_SERVICE_ENDPOINT
-
-ARG REACT_APP_MIRTH_ENDPOINT
-ENV REACT_APP_MIRTH_ENDPOINT $REACT_APP_MIRTH_ENDPOINT
-
-ARG REACT_APP_MIRTH_ENDPOINT_DOCS
-ENV REACT_APP_MIRTH_ENDPOINT_DOCS $REACT_APP_MIRTH_ENDPOINT_DOCS
-
-RUN npm run build
-
-# Stage 2 - Serve the Built App with Nginx
-FROM nginx:1.25.1
-COPY --from=builder /app/build /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-# Expose port
-EXPOSE 80
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Define the command to start your app
+CMD ["npm", "start"]

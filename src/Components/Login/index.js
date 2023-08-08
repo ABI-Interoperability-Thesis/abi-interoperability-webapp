@@ -114,7 +114,7 @@ const Login = (props) => {
                     </div>
                   </Form>
                 </Card>
-                <div>{process.env.REACT_APP_ENV}</div>
+                <div>ENV: {process.env.REACT_APP_ENV}</div>
               </div>
             )
             :
@@ -162,6 +162,7 @@ const Login = (props) => {
                     </div>
                   </Form>
                 </Card>
+                <div>ENV: {process.env.REACT_APP_ENV}</div>
               </div>
             )
         }
