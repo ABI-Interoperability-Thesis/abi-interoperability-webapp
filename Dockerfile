@@ -27,8 +27,9 @@ RUN npm run build
 
 # Stage 2 - Serve the Built App with Nginx
 FROM nginx:1.25.1
-WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*
+COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/build .
-ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
+# Expose port
+EXPOSE 80
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
