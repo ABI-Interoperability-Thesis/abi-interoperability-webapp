@@ -114,6 +114,7 @@ const Login = (props) => {
                     </div>
                   </Form>
                 </Card>
+                <div>{process.env.REACT_APP_ENV}</div>
               </div>
             )
             :
