@@ -1,0 +1,19 @@
+version: '3.1'
+services:
+  abi-webapp:
+    image: ghcr.io/abi-interoperability-thesis/abi-interoperability-webapp:latest
+    container_name: 'abi-webapp'
+    ports:
+      - "3004:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_ENV=prod
+      - REACT_APP_MYSQL_SERVICE_ENDPOINT=http://127.0.0.1:3002
+      - REACT_APP_MIRTH_SERVICE_ENDPOINT=http://127.0.0.1:3000
+      - REACT_APP_RABBITMQ_SERVICE_ENDPOINT=http://127.0.0.1:3000
+      - REACT_APP_MIRTH_ENDPOINT=http://mirth-connect
+      - REACT_APP_MIRTH_ENDPOINT_DOCS=http://127.0.0.1
+    depends_on:
+      - mysql-webservice
+      - mirth-api-webservice
+      - message-queue-webservice

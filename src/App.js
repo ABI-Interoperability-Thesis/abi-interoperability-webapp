@@ -40,7 +40,7 @@ import './index.css'
 const { Title } = Typography
 const { Header, Sider, Content } = Layout;
 const app_env = process.env.REACT_APP_ENV
-const mysql_endpoint = endpoints['mysql-ws'][app_env]
+const mysql_endpoint = process.env.REACT_APP_MYSQL_SERVICE_ENDPOINT
 
 const App = () => {
   const location = useLocation();
