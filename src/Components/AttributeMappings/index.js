@@ -109,7 +109,7 @@ const AttributeMappings = () => {
               modelAttributes &&
               <Table dataSource={modelAttributes} columns={columns_attributes} />
             }
-            <Button type='primary' style={{ backgroundColor: '#4CAF50' }} onClick={() => setCreateNew(true)}>New Mapping</Button>
+            <Button type='primary' style={{ backgroundColor: '#4CAF50', marginTop: '1rem' }} onClick={() => setCreateNew(true)}>New Mapping</Button>
           </div>
         )
       }

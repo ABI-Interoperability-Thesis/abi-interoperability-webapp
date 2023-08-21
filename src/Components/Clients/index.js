@@ -55,7 +55,7 @@ const Clients = () => {
           <>
             <Title level={2}>Clients</Title>
             <Table dataSource={data} columns={columns} />
-            <Button type='primary' style={{ backgroundColor: '#4CAF50' }} onClick={() => setCreateNew(true)}>New Client</Button>
+            <Button type='primary' style={{ backgroundColor: '#4CAF50', marginTop: '1rem' }} onClick={() => setCreateNew(true)}>New Client</Button>
           </>
       }
 

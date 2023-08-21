@@ -292,7 +292,6 @@ const App = () => {
                             <Route path="/preprocessors" element={<Preprocessors />} />
                             <Route path='/issues' element={<Issues />} />
                             <Route path="/issues/:issue_id" element={<IssueDetailsAdmin currentAcc={currentAcc} />} />
-
                           </Routes>
                         </Content>
                       </Layout>

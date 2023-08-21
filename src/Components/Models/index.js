@@ -54,7 +54,7 @@ const Models = () => {
           <>
             <Title level={2}>Machine Learning Models</Title>
             <Table dataSource={data} columns={columns} />
-            <Button type='primary' style={{ backgroundColor: '#4CAF50'}} onClick={() => setCreateNew(true)}>Create New Model</Button>
+            <Button type='primary' style={{ backgroundColor: '#4CAF50', marginTop: '1rem'}} onClick={() => setCreateNew(true)}>Create New Model</Button>
           </>
       }
     </>

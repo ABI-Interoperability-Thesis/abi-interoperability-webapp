@@ -24,8 +24,8 @@ const Channels = () => {
     const axios_response = await axios(config)
     const mirth_ids = axios_response.data
 
-    const runner_info = await GetChannelInfo(mirth_ids['runner_channel'])
-    const tester_info = await GetChannelInfo(mirth_ids['tester_channel'])
+    const runner_info = mirth_ids['runner_channel'] === 'not found' ? 'not found' : await GetChannelInfo(mirth_ids['runner_channel'])
+    const tester_info = mirth_ids['tester_channel'] === 'not found' ? 'not found' : await GetChannelInfo(mirth_ids['tester_channel'])
 
     console.log({ runner_info, tester_info })
     setMirthChannels({ runner_info, tester_info })
