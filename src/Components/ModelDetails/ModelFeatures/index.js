@@ -28,7 +28,6 @@ const ModelFeatures = (props) => {
 
     return (
         <>
-            <Title level={3}>Model Attributes</Title>
             <div style={{display: "flex", gap: "1rem", flexDirection: "column"}}>
             {
                 modelAttributes.map((item) => (

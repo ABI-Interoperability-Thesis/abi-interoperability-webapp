@@ -122,7 +122,7 @@ const CreateRunnerChannel = (props) => {
                                 message: 'Please provide the Channel Description',
                             },
                         ]}>
-                            <Input placeholder='Channel Name' />
+                            <Input placeholder='Channel Port' />
                         </Form.Item>
 
                         <Form.Item label='Channel Port' name='channel_port' rules={[

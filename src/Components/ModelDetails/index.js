@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import endpoints from '../config/endpoints.json'
-import { Button, Typography, Collapse, Modal, Tag } from 'antd'
+import { Button, Typography, Collapse, Modal, Tag, Descriptions } from 'antd'
 import './index.css'
 import ModelFeatures from './ModelFeatures';
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons'
@@ -82,47 +82,45 @@ const ModelDetails = () => {
                     :
                     (
                         <>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }} >
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <Title level={3} style={{ margin: 0, padding: 0 }}>Model Name</Title>
-                                    <Paragraph style={{ margin: 0 }}>
-                                        <pre>{modelData.model_name}</pre>
-                                    </Paragraph>
-                                </div>
+                            {modelData.model_type}
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Title level={2}>Model Details</Title>
                                 <Button danger onClick={() => setConfirmVisible(true)}>Delete</Button>
-                            </div >
-                            <div className='model-header'>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <Title level={4} style={{ margin: 0, padding: 0 }}>Model Description</Title>
-                                    <Paragraph style={{ margin: 0 }}>
-                                        <pre>{modelData.description}</pre>
-                                    </Paragraph>
-                                </div>
-                                <Title level={3} style={{ padding: 0, margin: 0 }}>Attributes: {modelData.attribute_count}</Title>
                             </div>
-
-                            <div className='model-header'>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <Title level={4} style={{ margin: 0, padding: 0 }}>Deployed</Title>
+                            <Descriptions column={1} bordered>
+                                <Descriptions.Item label='Model Name'>{modelData.model_name}</Descriptions.Item>
+                                <Descriptions.Item label='Model Description'>{modelData.description}</Descriptions.Item>
+                                <Descriptions.Item label='Model Type'>{modelData.model_type}</Descriptions.Item>
+                                <Descriptions.Item label='Attribute Number'>{modelData.attribute_count}</Descriptions.Item>
+                                <Descriptions.Item label='Deployed'>
                                     {modelData.deployed ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />}
+                                </Descriptions.Item>
+                            </Descriptions>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Title style={{ margin: 0 }} level={3}>Model Attributes</Title>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    {
+                                        canDeploy && !modelData.deployed &&
+                                        <Tag color='success'>Model is ready to Deploy</Tag>
+                                    }
+
+                                    {
+                                        !canDeploy && !modelData.deployed &&
+                                        <Tag color='error'>Model is not ready to Deploy</Tag>
+                                    }
+
+                                    <div className='model-header'>
+
+                                        {
+                                            modelData.deployed ?
+                                                (<Button type='primary' style={{ backgroundColor: '#F44336' }} onClick={UndeployModel}>Undeploy Model</Button>)
+                                                :
+                                                (<Button type='primary' onClick={DeployModel}>Deploy Model</Button>)
+                                        }
+                                    </div>
                                 </div>
-                                {
-                                    modelData.deployed ?
-                                        (<Button type='primary' style={{ backgroundColor: '#F44336' }} onClick={UndeployModel}>Undeploy Model</Button>)
-                                        :
-                                        (<Button type='primary' onClick={DeployModel}>Deploy Model</Button>)
-                                }
                             </div>
-
-                            {
-                                canDeploy && !modelData.deployed &&
-                                <Tag color='success'>Model is ready to Deploy</Tag>
-                            }
-
-                            {
-                                !canDeploy && !modelData.deployed &&
-                                <Tag color='error'>Model is not ready to Deploy</Tag>
-                            }
 
                             <ModelFeatures GetModelConfigs={GetModelConfigs} deployed={modelData.deployed} model={modelData.model_name} model_id={model_id} />
 

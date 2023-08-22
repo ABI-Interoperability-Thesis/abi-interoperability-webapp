@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Typography, Statistic, Table, Button } from 'antd';
+import { Card, Typography, Statistic, Table, Button, Tag } from 'antd';
 import { Link } from 'react-router-dom';
 import CountUp from 'react-countup';
-import endpoints from '../../Components/config/endpoints.json'
 import axios from 'axios'
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
 
 import './index.css'
 const formatter = (value) => <CountUp end={value} separator="," />;
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 const app_env = process.env.REACT_APP_ENV
 const mysql_endpoint = process.env.REACT_APP_MYSQL_SERVICE_ENDPOINT
 
@@ -18,6 +17,27 @@ const Dashboard = () => {
     const [requestsInfoByModel, setRequestsInfoByModel] = useState([])
     const [modelConfigs, setModelConfigs] = useState([])
     const [issueInfobyClient, setIssueInfobyClient] = useState([])
+    const [mirthChannels, setMirthChannels] = useState();
+
+
+    const GetChannelIds = async () => {
+        // Getting mirth channels ids
+        const url = `${mysql_endpoint}/api/mirth-channels`
+        const method = 'get'
+        const config = { method, url }
+        const axios_response = await axios(config)
+        const mirth_ids = axios_response.data
+        setMirthChannels([
+            {
+                channel: 'Runner Channel',
+                state: mirth_ids['runner_channel']
+            },
+            {
+                channel: 'Tester Channel',
+                state: mirth_ids['tester_channel']
+            }
+        ])
+    }
 
     const GetAllRequestsInfo = async () => {
         const url = `${mysql_endpoint}/api/dash-requests`
@@ -60,6 +80,7 @@ const Dashboard = () => {
         GetAllRequestsInfoByModel()
         GetModelConfigs()
         GetIssueInfoByClient()
+        GetChannelIds()
     }, [])
 
     const columns = [
@@ -99,6 +120,11 @@ const Dashboard = () => {
         { title: 'Closed Issues', dataIndex: 'closed_issues', key: 'closed_issues' },
     ]
 
+    const mirth_columns = [
+        { title: 'Channel', dataIndex: 'channel', key: 'channel' },
+        { title: 'Channel State', key: 'state', render: (obj) => (obj.state !== 'not found' ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
+    ]
+
     return (
         <>
             <Title level={2}>Request Information</Title>
@@ -113,6 +139,23 @@ const Dashboard = () => {
                     <Statistic title="Total AnsweredRequests" value={requestsInfo['answered_requests']} formatter={formatter} valueStyle={{ color: '#4CAF50' }} />
                 </Card>
             </div>
+
+            {
+                mirthChannels &&
+                <div>
+                    <Title level={2}>Mirth Channels</Title>
+                    {
+                        (mirthChannels[0].state === 'not found' || mirthChannels[1].state === 'not found') &&
+                        <Paragraph style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <Tag color='warning'>The Mirth Channels are not configured. They are necessary to run this system.</Tag>
+                            <Link to={'/channels'}>
+                                <Button type='primary'>Configure Channels</Button>
+                            </Link>
+                        </Paragraph>
+                    }
+                    <Table dataSource={mirthChannels} columns={mirth_columns} />
+                </div>
+            }
 
             <Title level={2}>Model Requests</Title>
             <Table dataSource={requestsInfoByModel} columns={columns} />

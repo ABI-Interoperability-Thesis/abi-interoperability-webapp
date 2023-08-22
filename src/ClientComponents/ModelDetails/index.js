@@ -159,6 +159,7 @@ const ModelDetails = () => {
                     <Descriptions style={{ marginBottom: '1rem' }} title='Model Summary' column={1} bordered>
                         <Descriptions.Item label='Model Name'>{modelData['model']['model_name']}</Descriptions.Item>
                         <Descriptions.Item label='Model Description'>{modelData['model']['description']}</Descriptions.Item>
+                        <Descriptions.Item label='Model Type'>{modelData['model']['model_type']}</Descriptions.Item>
                         <Descriptions.Item label='Attribute Count'>{modelData['model']['attribute_count']}</Descriptions.Item>
                         <Descriptions.Item label='Permission'>
                             <div>

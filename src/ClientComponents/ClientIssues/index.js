@@ -84,7 +84,7 @@ const ClientIssues = () => {
                                 issues &&
                                 <Table dataSource={issues} columns={columns} />
                             }
-                            <Button style={{ backgroundColor: '#4CAF50' }} type='primary' onClick={() => setCreate(true)}>New Issue</Button>
+                            <Button style={{ backgroundColor: '#4CAF50', marginTop: '1rem' }} type='primary' onClick={() => setCreate(true)}>New Issue</Button>
                         </>
                     )
             }

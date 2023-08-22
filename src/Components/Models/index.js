@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'
-import endpoints from '../config/endpoints.json'
+import SVG from './svg';
 import './index.css'
 import { Table, Button, Popconfirm, Typography } from 'antd'
 import axios from 'axios'
@@ -28,6 +28,7 @@ const Models = () => {
   const columns = [
     { title: 'Model Name', dataIndex: 'model_name', key: 'model_name' },
     { title: 'Description', dataIndex: 'description', key: 'description' },
+    { title: 'Type', key: 'model_type', render: (obj) => (obj.model_type === 'prediction' ? <SVG type='prediction'/> : <SVG type='optimization' />) },
     { title: 'Deployed', dataIndex: 'deployed', key: 'deployed' },
     { title: 'Attributes', dataIndex: 'attribute_count', key: 'attribute_count' },
     {
@@ -54,7 +55,7 @@ const Models = () => {
           <>
             <Title level={2}>Machine Learning Models</Title>
             <Table dataSource={data} columns={columns} />
-            <Button type='primary' style={{ backgroundColor: '#4CAF50', marginTop: '1rem'}} onClick={() => setCreateNew(true)}>Create New Model</Button>
+            <Button type='primary' style={{ backgroundColor: '#4CAF50', marginTop: '1rem' }} onClick={() => setCreateNew(true)}>Create New Model</Button>
           </>
       }
     </>

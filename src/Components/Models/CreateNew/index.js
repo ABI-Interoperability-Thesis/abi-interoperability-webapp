@@ -45,6 +45,10 @@ const CreateNew = (props) => {
                     <Input placeholder="Enter the model name" />
                 </Form.Item>
 
+                <Form.Item label='Model Type' name='model_type'>
+                    <Select placeholder="Model Type" options={[{ value: 'prediction', label: 'Prediction' }, { value: 'optimization', label: 'Optimization' }]} />
+                </Form.Item>
+
                 <Form.Item label="Model Description" name='description'>
                     <TextArea placeholder="Enter a description for a model" />
                 </Form.Item>
