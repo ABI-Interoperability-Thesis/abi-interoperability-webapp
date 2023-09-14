@@ -1,0 +1,42 @@
+[
+    {
+        "label": "Visual Studio Light",
+        "value": "vs"
+    },
+    {
+        "label": "Visual Studio Dark",
+        "value": "vs-dark"
+    },
+    {
+        "label": "Ayu Light",
+        "value": "ayu-light"
+    },
+    {
+        "label": "Cobalt 2",
+        "value": "Cobalt2"
+    },
+    {
+        "label": "Dracula",
+        "value": "dracula"
+    },
+    {
+        "label": "One Dark Pro",
+        "value": "One Dark Pro"
+    },
+    {
+        "label": "Solarized Dark",
+        "value": "solarized-dark"
+    },
+    {
+        "label": "Nord",
+        "value": "Nord"
+    },
+    {
+        "label": "Material Theme",
+        "value": "Material Theme"
+    },
+    {
+        "label": "Palenight",
+        "value": "Palenight"
+    }
+]

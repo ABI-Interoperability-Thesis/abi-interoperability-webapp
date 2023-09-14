@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import endpoints from '../config/endpoints.json'
-import { Button, Typography, Collapse, Modal, Tag, Descriptions } from 'antd'
+import { Button, Typography, Collapse, Modal, Tag, Descriptions, Switch, notification, Tabs } from 'antd'
 import './index.css'
 import ModelFeatures from './ModelFeatures';
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons'
 import { LoadingOutlined } from '@ant-design/icons';
 import Loading from '../../Common/Loading';
+import TestModelComponent from '../../ClientComponents/ModelDetails/TestModel'
 
 const { Title, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -26,12 +27,22 @@ const ModelDetails = () => {
     const [errorMessage, setErrorMessage] = useState();
     const [loading, setLoading] = useState(true);
     const [canDeploy, setCanDeploy] = useState();
+    const [fhirDeploy, setFhirDeploy] = useState(false);
+    const [hl7Deploy, setHl7Deploy] = useState(false);
+
+    const [api, contextHolder] = notification.useNotification();
+
 
     const GetModel = async () => {
         const url = `${mysql_endpoint}/api/models/${model_id}`
         const response = await axios.get(url)
-        setLoading(false)
+
+        console.log(response.data)
+
+        setHl7Deploy(response.data.hl7_support === 1 ? true : false)
+        setFhirDeploy(response.data.fhir_support === 1 ? true : false)
         setModelData(response.data)
+        setLoading(false)
     }
 
     const UndeployModel = async () => {
@@ -44,12 +55,30 @@ const ModelDetails = () => {
     }
 
     const DeployModel = async () => {
+        console.log(hl7Deploy)
+        console.log(fhirDeploy)
         const url = `${mysql_endpoint}/api/deploy-model/${model_id}`
+        const data = {
+            hl7_support: hl7Deploy,
+            fhir_support: fhirDeploy
+        }
         const method = 'put'
-        const config = { method, url }
-        const axios_response = await axios(config)
-        const req_data = axios_response.data
-        if (req_data.status !== 200) { setErrorMessage(req_data); setDeployModalOpen(true) }
+        const config = { method, url, data }
+
+        try {
+            const axios_response = await axios(config)
+            if (axios_response.status === 200) {
+                api.success({
+                    message: 'Success',
+                    description: axios_response.data.message
+                })
+            }
+        } catch (error) {
+            api.error({
+                message: `Error [Status Code - ${error.response.status}]`,
+                description: error.response.data.message
+            })
+        }
         GetModel()
     }
 
@@ -58,6 +87,14 @@ const ModelDetails = () => {
         const response = await axios.get(url)
         setLoading(false)
         setCanDeploy(response.data)
+
+        if (response.data.configured_hl7 === false) {
+            setHl7Deploy(false)
+        }
+
+        if (response.data.configured_fhir === false) {
+            setFhirDeploy(false)
+        }
     }
 
     useEffect(() => {
@@ -74,6 +111,24 @@ const ModelDetails = () => {
         navigate('/models')
     }
 
+    const GenerateTabs = () => {
+        let tabs = []
+        tabs.push({
+            key: '1',
+            label: 'Model Interoperability Configuration',
+            children: <ModelFeatures GetModelConfigs={GetModelConfigs} deployed={modelData.deployed} model={modelData.model_name} model_id={model_id} />
+        })
+
+        if (modelData.deployed === 1) {
+            tabs.push({
+                key: '2',
+                label: 'Test this model',
+                children: <TestModelComponent model_name={modelData['model_name']} endpoint={mysql_endpoint} hl7_support={modelData['hl7_support'] === 1 ? true : false} fhir_support={modelData['fhir_support'] === 1 ? true : false} />
+            })
+        }
+        return tabs
+    }
+
     return (
         <>
             {
@@ -82,7 +137,7 @@ const ModelDetails = () => {
                     :
                     (
                         <>
-                            {modelData.model_type}
+                            {contextHolder}
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Title level={2}>Model Details</Title>
                                 <Button danger onClick={() => setConfirmVisible(true)}>Delete</Button>
@@ -95,19 +150,60 @@ const ModelDetails = () => {
                                 <Descriptions.Item label='Deployed'>
                                     {modelData.deployed ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />}
                                 </Descriptions.Item>
+
+                                <Descriptions.Item label='Source Support'>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        {
+                                            modelData.hl7_support === 1 &&
+                                            <Tag color='geekblue'>HL7</Tag>
+                                        }
+
+                                        {
+                                            modelData.fhir_support === 1 &&
+                                            <Tag color='geekblue'>FHIR</Tag>
+                                        }
+
+                                        {
+                                            modelData.fhir_support === 0 && modelData.hl7_support === 0 &&
+                                            <Tag color='geekblue'>No Support</Tag>
+                                        }
+                                    </div>
+                                </Descriptions.Item>
                             </Descriptions>
 
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Title style={{ margin: 0 }} level={3}>Model Attributes</Title>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    {
-                                        canDeploy && !modelData.deployed &&
-                                        <Tag color='success'>Model is ready to Deploy</Tag>
-                                    }
 
                                     {
-                                        !canDeploy && !modelData.deployed &&
-                                        <Tag color='error'>Model is not ready to Deploy</Tag>
+                                        canDeploy &&
+                                        <div>
+                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <p>HL7 Support</p>
+                                                <Switch
+                                                    checked={hl7Deploy}
+                                                    checkedChildren="Enabled"
+                                                    unCheckedChildren="Disabled"
+                                                    onChange={() => {
+                                                        setHl7Deploy(!hl7Deploy);
+                                                    }}
+                                                    disabled={!canDeploy['configured_hl7']}
+                                                />
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <p>FHIR Support</p>
+                                                <Switch
+                                                    checked={fhirDeploy}
+                                                    checkedChildren="Enabled"
+                                                    unCheckedChildren="Disabled"
+                                                    onChange={() => {
+                                                        setFhirDeploy(!fhirDeploy);
+                                                    }}
+                                                    disabled={!canDeploy['configured_fhir']}
+                                                />
+                                            </div>
+                                        </div>
                                     }
 
                                     <div className='model-header'>
@@ -118,11 +214,13 @@ const ModelDetails = () => {
                                                 :
                                                 (<Button type='primary' onClick={DeployModel}>Deploy Model</Button>)
                                         }
+
                                     </div>
                                 </div>
                             </div>
 
-                            <ModelFeatures GetModelConfigs={GetModelConfigs} deployed={modelData.deployed} model={modelData.model_name} model_id={model_id} />
+                            <Tabs items={GenerateTabs()} />
+
 
                             <Link to='/models'>
                                 <Button type='primary' style={{ backgroundColor: '#F44336', marginTop: '1rem' }}>Back to Models</Button>

@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import endpoints from '../../Components/config/endpoints.json'
-import { Typography, Tabs, Descriptions, Input, Button, Form, Tag } from 'antd';
+import { Typography, Tabs, Descriptions, Input, Button, Form, Tag, Divider } from 'antd';
 import AttributeCard from './AttributeCard/index'
+import AttributeCard2 from './AttributeCard2/index'
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons'
 import Loading from '../../Common/Loading/index'
+import TestModelComponent from './TestModel'
 
 const { Title, Paragraph } = Typography
 const { TextArea } = Input;
@@ -166,6 +168,24 @@ const ModelDetails = () => {
                                 {modelData.client_permission ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />}
                             </div>
                         </Descriptions.Item>
+                        <Descriptions.Item label="Support">
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                {
+                                    modelData['model'].hl7_support === 1 &&
+                                    <Tag color='geekblue'>HL7</Tag>
+                                }
+
+                                {
+                                    modelData['model'].fhir_support === 1 &&
+                                    <Tag color='geekblue'>FHIR</Tag>
+                                }
+
+                                {
+                                    modelData['model'].fhir_support === 0 && modelData['model'].hl7_support === 0 &&
+                                    <Tag color='geekblue'>No Support</Tag>
+                                }
+                            </div>
+                        </Descriptions.Item>
 
                     </Descriptions>
 
@@ -186,8 +206,18 @@ const ModelDetails = () => {
 
                                             <Title style={{ marginTop: "2rem" }} level={2}>Model Attributes</Title>
                                             {
-                                                modelData.attribute_configs.map((mapping) => (
-                                                    <AttributeCard mysql_endpoint={mysql_endpoint} data={mapping} />
+                                                modelData.attribute_configs.map((model_attribute, index) => (
+                                                    <>
+                                                        {
+                                                            index === 0 ?
+                                                                <AttributeCard2 attribute={model_attribute} />
+                                                                :
+                                                                <>
+                                                                    <Divider />
+                                                                    <AttributeCard2 attribute={model_attribute} />
+                                                                </>
+                                                        }
+                                                    </>
                                                 ))
                                             }
 
@@ -198,188 +228,193 @@ const ModelDetails = () => {
                         },
                         {
                             key: '2',
-                            label: 'Test the Model',
-                            children: (
-                                <>
-                                    {
-                                        channelPorts &&
-                                        <>
-                                            <Title level={2}>Test the Model</Title>
-                                            <Paragraph>
-                                                <pre>
-                                                    <Paragraph copyable>{`${channelPorts['tester_url']['docs']}?model=${modelData['model']['model_name']}`}</Paragraph>
-                                                </pre>
-                                            </Paragraph>
-                                            <Form onFinish={TestModel}>
-                                                <Form.Item name='messages'>
-                                                    <TextArea style={{ minHeight: '10rem' }} placeholder='Your HL7 messages' />
-                                                </Form.Item>
-                                                <Button htmlType='submit' style={{ marginTop: '1rem' }} type='primary'>Test Model</Button>
-                                            </Form>
-
-                                            {
-                                                loading ?
-                                                    (
-                                                        <Loading />
-                                                    ) :
-                                                    (
-                                                        <>
-                                                            {
-                                                                testResponse &&
-                                                                <div style={{ marginTop: '1rem' }}>
-                                                                    {
-                                                                        testResponse.complete_req === true && testResponse.req_valid === true ?
-                                                                            (<Tag color='green'>Request is ready to run model</Tag>) :
-                                                                            (<Tag color='red'>Request is not ready to run model</Tag>)
-                                                                    }
-                                                                    <Descriptions style={{ marginTop: '1rem' }} title='System Response' bordered column={1}>
-                                                                        <Descriptions.Item label='Status'>{testResponse.status}</Descriptions.Item>
-                                                                        <Descriptions.Item label='Client Permission'>
-                                                                            {
-                                                                                testResponse.client_permission ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />
-                                                                            }
-                                                                        </Descriptions.Item>
-
-                                                                        {
-                                                                            testResponse.complete_req !== null &&
-                                                                            <Descriptions.Item label='Complete Request'>
-                                                                                {
-                                                                                    testResponse.complete_req ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />
-                                                                                }
-                                                                            </Descriptions.Item>
-                                                                        }
-
-                                                                        {
-                                                                            testResponse.req_valid !== null &&
-                                                                            <Descriptions.Item label='Valid Request'>
-                                                                                {
-                                                                                    testResponse.req_valid ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />
-                                                                                }
-                                                                            </Descriptions.Item>
-                                                                        }
-
-
-                                                                    </Descriptions>
-
-                                                                    {
-                                                                        testResponse.fields_response !== null &&
-                                                                        <Descriptions style={{ marginTop: '1rem' }} title='Request Data' bordered column={1}>
-                                                                            {
-                                                                                Object.keys(testResponse.fields_response).map((field, index) => (
-                                                                                    <Descriptions.Item label={field} key={index}>
-                                                                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                                                            <b><p>Status: </p></b>
-                                                                                            {testResponse.fields_response[field]['status'] === 'ok' ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />}
-                                                                                            <b><p>Value: </p></b>
-                                                                                            {
-                                                                                                testResponse.fields_response[field]['value'] ?
-                                                                                                    <>{testResponse.fields_response[field]['value']}</> : 'missing'
-                                                                                            }
-
-                                                                                            {
-                                                                                                testResponse.fields_response[field]['msg_type'] &&
-                                                                                                <>
-                                                                                                    <b><p>Message Type: </p></b>
-                                                                                                    {testResponse.fields_response[field]['msg_type']}
-                                                                                                </>
-                                                                                            }
-
-                                                                                            {
-                                                                                                testResponse.fields_response[field]['mapping'] &&
-                                                                                                <>
-                                                                                                    <b><p>Field Mapping: </p></b>
-                                                                                                    {testResponse.fields_response[field]['mapping']}
-                                                                                                </>
-                                                                                            }
-
-                                                                                            {
-                                                                                                testResponse.fields_response[field]['msg_triggers'] &&
-                                                                                                <>
-                                                                                                    <b><p>Message Triggers: </p></b>
-                                                                                                    {testResponse.fields_response[field]['msg_triggers']}
-                                                                                                </>
-                                                                                            }
-                                                                                        </div>
-                                                                                    </Descriptions.Item>
-                                                                                ))
-                                                                            }
-                                                                        </Descriptions>
-                                                                    }
-
-                                                                    {
-                                                                        testResponse.val_obj &&
-                                                                        <Descriptions style={{ marginTop: '1rem' }} title='Data Validation' bordered column={1}>
-                                                                            {
-                                                                                Object.keys(testResponse.val_obj).map((field, index) => (
-                                                                                    <Descriptions.Item label={field} key={index}>
-                                                                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                                                            <b><p>Validation: </p></b>
-                                                                                            {testResponse.val_obj[field]['validation_response'] ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />}
-                                                                                            <b><p>Documentation: </p></b>
-                                                                                            {testResponse.val_obj[field]['description']}
-                                                                                            <b><p>Regex: </p></b>
-                                                                                            {testResponse.val_obj[field]['regex']}
-                                                                                        </div>
-                                                                                    </Descriptions.Item>
-                                                                                ))
-                                                                            }
-                                                                        </Descriptions>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                        </>
-                                                    )
-                                            }
-                                        </>
-                                    }
-                                </>
-                            )
-                        },
-                        {
-                            key: '3',
-                            label: 'Run the Model',
-                            children: (
-                                <>
-                                    {
-                                        channelPorts &&
-                                        <>
-                                            <Title level={2}>Test the Model</Title>
-                                            <Paragraph>
-                                                <pre>
-                                                    <Paragraph copyable>{`${channelPorts['runner_url']['docs']}?model=${modelData['model']['model_name']}`}</Paragraph>
-                                                </pre>
-                                            </Paragraph>
-                                            <Form onFinish={RunModel}>
-                                                <Form.Item name='messages'>
-                                                    <TextArea style={{ minHeight: '10rem' }} placeholder='Your HL7 messages' />
-                                                </Form.Item>
-                                                <Button htmlType='submit' style={{ marginTop: '1rem' }} type='primary'>Run Model</Button>
-                                            </Form>
-
-                                            {
-                                                runnerLoading ?
-                                                    (
-                                                        <Loading />
-                                                    )
-                                                    :
-                                                    (
-                                                        <>
-                                                            {
-                                                                runnerResponse &&
-                                                                <Descriptions title='System Response' bordered column={1}>
-                                                                    <Descriptions.Item label='Status'>{runnerResponse.status}</Descriptions.Item>
-                                                                    <Descriptions.Item label='Message'>{runnerResponse.message}</Descriptions.Item>
-                                                                </Descriptions>
-                                                            }
-                                                        </>
-                                                    )
-                                            }
-                                        </>
-                                    }
-
-                                </>
-                            )
+                            label: 'Test this Model',
+                            children: <TestModelComponent model_name={modelData['model']['model_name']} endpoint={mysql_endpoint} hl7_support={modelData['model']['hl7_support'] === 1 ? true : false} fhir_support={modelData['model']['fhir_support'] === 1 ? true : false}/>
                         }
+                        // {
+                        //     key: '2',
+                        //     label: 'Test the Model',
+                        //     children: (
+                        //         <>
+                        //             {
+                        //                 channelPorts &&
+                        //                 <>
+                        //                     <Title level={2}>Test the Model</Title>
+                        //                     <Paragraph>
+                        //                         <pre>
+                        //                             <Paragraph copyable>{`${channelPorts['tester_url']['docs']}?model=${modelData['model']['model_name']}`}</Paragraph>
+                        //                         </pre>
+                        //                     </Paragraph>
+                        //                     <Form onFinish={TestModel}>
+                        //                         <Form.Item name='messages'>
+                        //                             <TextArea style={{ minHeight: '10rem' }} placeholder='Your HL7 messages' />
+                        //                         </Form.Item>
+                        //                         <Button htmlType='submit' style={{ marginTop: '1rem' }} type='primary'>Test Model</Button>
+                        //                     </Form>
+
+                        //                     {
+                        //                         loading ?
+                        //                             (
+                        //                                 <Loading />
+                        //                             ) :
+                        //                             (
+                        //                                 <>
+                        //                                     {
+                        //                                         testResponse &&
+                        //                                         <div style={{ marginTop: '1rem' }}>
+                        //                                             {
+                        //                                                 testResponse.complete_req === true && testResponse.req_valid === true ?
+                        //                                                     (<Tag color='green'>Request is ready to run model</Tag>) :
+                        //                                                     (<Tag color='red'>Request is not ready to run model</Tag>)
+                        //                                             }
+                        //                                             <Descriptions style={{ marginTop: '1rem' }} title='System Response' bordered column={1}>
+                        //                                                 <Descriptions.Item label='Status'>{testResponse.status}</Descriptions.Item>
+                        //                                                 <Descriptions.Item label='Client Permission'>
+                        //                                                     {
+                        //                                                         testResponse.client_permission ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />
+                        //                                                     }
+                        //                                                 </Descriptions.Item>
+
+                        //                                                 {
+                        //                                                     testResponse.complete_req !== null &&
+                        //                                                     <Descriptions.Item label='Complete Request'>
+                        //                                                         {
+                        //                                                             testResponse.complete_req ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />
+                        //                                                         }
+                        //                                                     </Descriptions.Item>
+                        //                                                 }
+
+                        //                                                 {
+                        //                                                     testResponse.req_valid !== null &&
+                        //                                                     <Descriptions.Item label='Valid Request'>
+                        //                                                         {
+                        //                                                             testResponse.req_valid ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />
+                        //                                                         }
+                        //                                                     </Descriptions.Item>
+                        //                                                 }
+
+
+                        //                                             </Descriptions>
+
+                        //                                             {
+                        //                                                 testResponse.fields_response !== null &&
+                        //                                                 <Descriptions style={{ marginTop: '1rem' }} title='Request Data' bordered column={1}>
+                        //                                                     {
+                        //                                                         Object.keys(testResponse.fields_response).map((field, index) => (
+                        //                                                             <Descriptions.Item label={field} key={index}>
+                        //                                                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        //                                                                     <b><p>Status: </p></b>
+                        //                                                                     {testResponse.fields_response[field]['status'] === 'ok' ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />}
+                        //                                                                     <b><p>Value: </p></b>
+                        //                                                                     {
+                        //                                                                         testResponse.fields_response[field]['value'] ?
+                        //                                                                             <>{testResponse.fields_response[field]['value']}</> : 'missing'
+                        //                                                                     }
+
+                        //                                                                     {
+                        //                                                                         testResponse.fields_response[field]['msg_type'] &&
+                        //                                                                         <>
+                        //                                                                             <b><p>Message Type: </p></b>
+                        //                                                                             {testResponse.fields_response[field]['msg_type']}
+                        //                                                                         </>
+                        //                                                                     }
+
+                        //                                                                     {
+                        //                                                                         testResponse.fields_response[field]['mapping'] &&
+                        //                                                                         <>
+                        //                                                                             <b><p>Field Mapping: </p></b>
+                        //                                                                             {testResponse.fields_response[field]['mapping']}
+                        //                                                                         </>
+                        //                                                                     }
+
+                        //                                                                     {
+                        //                                                                         testResponse.fields_response[field]['msg_triggers'] &&
+                        //                                                                         <>
+                        //                                                                             <b><p>Message Triggers: </p></b>
+                        //                                                                             {testResponse.fields_response[field]['msg_triggers']}
+                        //                                                                         </>
+                        //                                                                     }
+                        //                                                                 </div>
+                        //                                                             </Descriptions.Item>
+                        //                                                         ))
+                        //                                                     }
+                        //                                                 </Descriptions>
+                        //                                             }
+
+                        //                                             {
+                        //                                                 testResponse.val_obj &&
+                        //                                                 <Descriptions style={{ marginTop: '1rem' }} title='Data Validation' bordered column={1}>
+                        //                                                     {
+                        //                                                         Object.keys(testResponse.val_obj).map((field, index) => (
+                        //                                                             <Descriptions.Item label={field} key={index}>
+                        //                                                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        //                                                                     <b><p>Validation: </p></b>
+                        //                                                                     {testResponse.val_obj[field]['validation_response'] ? <CheckCircleFilled style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleFilled style={{ fontSize: '1.5rem', color: '#FF9800' }} />}
+                        //                                                                     <b><p>Documentation: </p></b>
+                        //                                                                     {testResponse.val_obj[field]['description']}
+                        //                                                                     <b><p>Regex: </p></b>
+                        //                                                                     {testResponse.val_obj[field]['regex']}
+                        //                                                                 </div>
+                        //                                                             </Descriptions.Item>
+                        //                                                         ))
+                        //                                                     }
+                        //                                                 </Descriptions>
+                        //                                             }
+                        //                                         </div>
+                        //                                     }
+                        //                                 </>
+                        //                             )
+                        //                     }
+                        //                 </>
+                        //             }
+                        //         </>
+                        //     )
+                        // },
+                        // {
+                        //     key: '3',
+                        //     label: 'Run the Model',
+                        //     children: (
+                        //         <>
+                        //             {
+                        //                 channelPorts &&
+                        //                 <>
+                        //                     <Title level={2}>Test the Model</Title>
+                        //                     <Paragraph>
+                        //                         <pre>
+                        //                             <Paragraph copyable>{`${channelPorts['runner_url']['docs']}?model=${modelData['model']['model_name']}`}</Paragraph>
+                        //                         </pre>
+                        //                     </Paragraph>
+                        //                     <Form onFinish={RunModel}>
+                        //                         <Form.Item name='messages'>
+                        //                             <TextArea style={{ minHeight: '10rem' }} placeholder='Your HL7 messages' />
+                        //                         </Form.Item>
+                        //                         <Button htmlType='submit' style={{ marginTop: '1rem' }} type='primary'>Run Model</Button>
+                        //                     </Form>
+
+                        //                     {
+                        //                         runnerLoading ?
+                        //                             (
+                        //                                 <Loading />
+                        //                             )
+                        //                             :
+                        //                             (
+                        //                                 <>
+                        //                                     {
+                        //                                         runnerResponse &&
+                        //                                         <Descriptions title='System Response' bordered column={1}>
+                        //                                             <Descriptions.Item label='Status'>{runnerResponse.status}</Descriptions.Item>
+                        //                                             <Descriptions.Item label='Message'>{runnerResponse.message}</Descriptions.Item>
+                        //                                         </Descriptions>
+                        //                                     }
+                        //                                 </>
+                        //                             )
+                        //                     }
+                        //                 </>
+                        //             }
+
+                        //         </>
+                        //     )
+                        // }
                     ]} />
                 </>
 

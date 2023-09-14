@@ -39,7 +39,7 @@ const ChannelSource = (props) => {
             </Descriptions>
 
             <Descriptions style={{ marginTop: '1rem' }} title='Plugin Properties' bordered column={1}>
-                <Descriptions.Item label='Auth'>{connectorData.properties.pluginProperties['com.mirth.connect.plugins.httpauth.NoneHttpAuthProperties'].authType}</Descriptions.Item>
+                <Descriptions.Item label='Auth'>{connectorData.properties.pluginProperties['com.mirth.connect.plugins.httpauth.basic.BasicHttpAuthProperties'].authType}</Descriptions.Item>
             </Descriptions>
 
             <Descriptions style={{ marginTop: '1rem' }} title='Source Connector Properties' bordered column={1}>
@@ -165,7 +165,7 @@ const ChannelSource = (props) => {
                     label: 'Filters',
                     children: (
                         <>
-                        <Empty description='There are no filters setup for this channel' />
+                            <Empty description='There are no filters setup for this channel' />
                         </>
                     )
                 },
@@ -175,21 +175,40 @@ const ChannelSource = (props) => {
                     children: (
                         <>
                             {
-                                connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep'].map((transformer) => (
-                                    <Descriptions title={transformer.name}>
-                                        <Descriptions.Item label='Variable'>{transformer.variable}</Descriptions.Item>
-                                        <Descriptions.Item label='Mapping'>{transformer.mapping}</Descriptions.Item>
-                                        <Descriptions.Item label='Scope'>{transformer.scope}</Descriptions.Item>
-                                        <Descriptions.Item label='Version'>{transformer['@version']}</Descriptions.Item>
+                                !Array.isArray(connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep']) ?
+                                    <Descriptions title={connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep'].name}>
+                                        <Descriptions.Item label='Variable'>{connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep'].variable}</Descriptions.Item>
+                                        <Descriptions.Item label='Mapping'>{connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep'].mapping}</Descriptions.Item>
+                                        <Descriptions.Item label='Scope'>{connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep'].scope}</Descriptions.Item>
+                                        <Descriptions.Item label='Version'>{connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep']['@version']}</Descriptions.Item>
                                         <Descriptions.Item label='Enabled'>
                                             {
-                                                transformer.enabled ?
+                                                connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep'].enabled ?
                                                     (<CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} />) :
                                                     (<CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />)
                                             }
                                         </Descriptions.Item>
                                     </Descriptions>
-                                ))
+                                    :
+                                    <>
+                                        {
+                                            connectorData.transformer.elements['com.mirth.connect.plugins.mapper.MapperStep'].map((transformer) => (
+                                                <Descriptions title={transformer.name}>
+                                                    <Descriptions.Item label='Variable'>{transformer.variable}</Descriptions.Item>
+                                                    <Descriptions.Item label='Mapping'>{transformer.mapping}</Descriptions.Item>
+                                                    <Descriptions.Item label='Scope'>{transformer.scope}</Descriptions.Item>
+                                                    <Descriptions.Item label='Version'>{transformer['@version']}</Descriptions.Item>
+                                                    <Descriptions.Item label='Enabled'>
+                                                        {
+                                                            transformer.enabled ?
+                                                                (<CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} />) :
+                                                                (<CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />)
+                                                        }
+                                                    </Descriptions.Item>
+                                                </Descriptions>
+                                            ))
+                                        }
+                                    </>
                             }
                         </>
                     )

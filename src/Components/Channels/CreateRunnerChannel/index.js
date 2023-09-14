@@ -42,12 +42,11 @@ const CreateRunnerChannel = (props) => {
         }
 
         const data = {
-            channel_type,
             ...values
         }
         console.log(data)
 
-        const url = `${mirth_endpoint}/api/channels/create-channel`
+        const url = `${mirth_endpoint}/api/channels/create-hl7-mapper`
         const method = 'post'
         const config = { method, url, data }
         const axios_response = await axios(config)
@@ -84,13 +83,9 @@ const CreateRunnerChannel = (props) => {
     ]
 
     const channel_details = {
-        "runner": {
-            "name": "Runner",
-            "description": "This channel will process HL7 messages and run them through the entire Interoperability system. It's meant for production usage.",
-        },
-        "test": {
-            "name": "Tester",
-            "description": "This channel will only test incoming HL7 messages. It's meant for testing new models and mappings.",
+        "hl7_mapper": {
+            "name": "HL7 Mapper",
+            "description": "The HL7 Mapper Channel is a system-calling solution designed to swiftly extract requested values from provided HL7 messages using predefined mappings. It returns the identified value or signals the absence of data, ensuring efficient data retrieval within our healthcare system.",
         }
     }
 
@@ -107,24 +102,6 @@ const CreateRunnerChannel = (props) => {
                         </pre>
                     </Paragraph>
                     <Form onFinish={CreateChannel}>
-                        <Form.Item label='Channel Name' name='channel_name' rules={[
-                            {
-                                required: true,
-                                message: 'Please provide the Channel Name',
-                            },
-                        ]}>
-                            <Input placeholder='Channel Name' />
-                        </Form.Item>
-
-                        <Form.Item label='Channel Description' name='channel_description' rules={[
-                            {
-                                required: true,
-                                message: 'Please provide the Channel Description',
-                            },
-                        ]}>
-                            <Input placeholder='Channel Port' />
-                        </Form.Item>
-
                         <Form.Item label='Channel Port' name='channel_port' rules={[
                             {
                                 required: true,

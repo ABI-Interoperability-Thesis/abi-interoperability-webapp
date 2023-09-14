@@ -28,12 +28,13 @@ const ModelFeatures = (props) => {
 
     return (
         <>
-            <div style={{display: "flex", gap: "1rem", flexDirection: "column"}}>
-            {
-                modelAttributes.map((item) => (
-                   <AttributeCard GetModelConfigs={GetModelConfigs} deployed={deployed} model={model} model_id={model_id} endpoint={mysql_endpoint} data={item}/>
-                ))
-            }
+            <Title level={3}>Model Attributes</Title>
+            <div style={{ display: "flex", gap: "1rem", flexDirection: "column" }}>
+                {
+                    modelAttributes.map((item) => (
+                        <AttributeCard GetModelConfigs={GetModelConfigs} deployed={deployed} model={model} model_id={model_id} endpoint={mysql_endpoint} data={item} />
+                    ))
+                }
             </div>
         </>
     )

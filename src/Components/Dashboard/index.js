@@ -27,14 +27,11 @@ const Dashboard = () => {
         const config = { method, url }
         const axios_response = await axios(config)
         const mirth_ids = axios_response.data
+        console.log(mirth_ids)
         setMirthChannels([
             {
-                channel: 'Runner Channel',
-                state: mirth_ids['runner_channel']
-            },
-            {
-                channel: 'Tester Channel',
-                state: mirth_ids['tester_channel']
+                channel: 'HL7 Mapper Channel',
+                state: mirth_ids['hl7_mapper']
             }
         ])
     }
@@ -145,9 +142,9 @@ const Dashboard = () => {
                 <div>
                     <Title level={2}>Mirth Channels</Title>
                     {
-                        (mirthChannels[0].state === 'not found' || mirthChannels[1].state === 'not found') &&
+                        mirthChannels.some(channel => channel.state === 'not found') &&
                         <Paragraph style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <Tag color='warning'>The Mirth Channels are not configured. They are necessary to run this system.</Tag>
+                            <Tag color='warning'>HL7 Mapper Channel was not found. This channel is essential to run HL7 requests through the system.</Tag>
                             <Link to={'/channels'}>
                                 <Button type='primary'>Configure Channels</Button>
                             </Link>
@@ -155,6 +152,7 @@ const Dashboard = () => {
                     }
                     <Table dataSource={mirthChannels} columns={mirth_columns} />
                 </div>
+
             }
 
             <Title level={2}>Model Requests</Title>
