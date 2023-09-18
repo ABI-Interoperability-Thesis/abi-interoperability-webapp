@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Typography, Modal, Button, Form, Select, Input, Tabs, Descriptions, Tag } from 'antd'
+import { Typography, Modal, Button, Form, Select, Input, Tabs, Descriptions, Tag, Divider } from 'antd'
+import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
 const { Paragraph, Title } = Typography
 const { TextArea } = Input
 
@@ -13,6 +14,7 @@ const AttributeValidator = (props) => {
     const deployed = props.deployed
     const GetModelConfigs = props.GetModelConfigs
 
+    // HL7 Data
     const [validator, setValidator] = useState()
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [validationName, setValidationName] = useState();
@@ -20,6 +22,10 @@ const AttributeValidator = (props) => {
     const [validationRegex, setValidationRegex] = useState()
     const [description, setDescription] = useState()
     const [docDescription, setDocDescription] = useState()
+    const [validationsHL7, setValidationsHL7] = useState()
+    const [selectedValidatorHL7, setSelectedValidatorHL7] = useState()
+    const [hl7TestInputData, setHl7TestInputData] = useState()
+    const [hl7TestResponseData, setHl7TestResponseData] = useState()
 
     // Fhir Data
     const [fhirValidator, setFhirValidator] = useState()
@@ -29,6 +35,10 @@ const AttributeValidator = (props) => {
     const [validationRegexFhir, setValidationRegexFhir] = useState()
     const [descriptionFhir, setDescriptionFhir] = useState()
     const [docDescriptionFhir, setDocDescriptionFhir] = useState()
+    const [validationsFHIR, setValidationsFHIR] = useState()
+    const [selectedValidatorFHIR, setSelectedValidatorFHIR] = useState()
+    const [fhirTestInputData, setFhirTestInputData] = useState()
+    const [fhirTestResponseData, setFhirTestResponseData] = useState()
 
 
     const CheckValidator = async () => {
@@ -63,10 +73,10 @@ const AttributeValidator = (props) => {
         }
     }
 
-    const GetValidationOptions = async () => {
+    const GetValidationOptions = async (source_type) => {
         const config = {
             method: 'get',
-            url: `${endpoint}/api/validations`
+            url: `${endpoint}/api/validations/${source_type}`
         }
 
         const axios_response = await axios(config)
@@ -79,9 +89,8 @@ const AttributeValidator = (props) => {
         })
 
         treated.push({ label: 'custom', value: 'custom' })
-        setValidationOptions(treated)
-        setValidationOptionsFhir(treated)
-
+        source_type === 'hl7' ? setValidationOptions(treated) : setValidationOptionsFhir(treated)
+        source_type === 'hl7' ? setValidationsHL7(axios_response.data) : setValidationsFHIR(axios_response.data)
     }
 
     useEffect(() => {
@@ -89,7 +98,8 @@ const AttributeValidator = (props) => {
         CheckValidator()
         CheckValidatorFhir()
 
-        GetValidationOptions()
+        GetValidationOptions('hl7')
+        GetValidationOptions('fhir')
     }, [])
 
     const showModal = () => {
@@ -204,6 +214,34 @@ const AttributeValidator = (props) => {
 
     }
 
+    const HandleValidationChoice = (source_type, validationName) => {
+        source_type === 'hl7' ? setValidationName(validationName) : setValidationNameFhir(validationName)
+        console.log(validationName)
+        const arrayOfObjects = source_type === 'hl7' ? validationsHL7 : validationsFHIR
+        const selectedValidator = arrayOfObjects.find(obj => obj.validation_name === validationName);
+
+        console.log(selectedValidator)
+        source_type === 'hl7' ? setSelectedValidatorHL7(selectedValidator) : setSelectedValidatorFHIR(selectedValidator)
+    }
+
+    const TestValidator = async (pattern, testData, source_type) => {
+        const data = {
+            value: testData,
+            expression: pattern
+        }
+        
+        const url = `${endpoint}/api/test-validation`
+        const method = 'post'
+
+        const config = { method, url, data }
+
+        const axios_response = await axios(config)
+        const response_data = axios_response.data
+        console.log(response_data)
+
+        source_type === 'hl7' ? setHl7TestResponseData(response_data) : setFhirTestResponseData(response_data)
+    }
+
     return (
         <>
             <Descriptions column={2} style={{ width: '15rem' }}>
@@ -274,19 +312,53 @@ const AttributeValidator = (props) => {
                                                         showSearch
                                                         placeholder="Select a Validator"
                                                         options={validationOptions}
-                                                        onChange={(value) => { setValidationName(value) }}
+                                                        onChange={(value) => { HandleValidationChoice('hl7', value); setHl7TestResponseData(); setHl7TestInputData() }}
                                                     />
                                                 </Form.Item>
 
                                                 {
-                                                    validationName === 'custom' &&
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression here" onChange={(e) => { setValidationRegex(e.target.value) }} />
-                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDescription(e.target.value) }} />
-                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDocDescription(e.target.value) }} />
+                                                    selectedValidatorHL7 &&
+                                                    <div>
+                                                        <Descriptions title="Validator Metadata" bordered column={1}>
+                                                            <Descriptions.Item label="Designation">{selectedValidatorHL7['validation_name']}</Descriptions.Item>
+                                                            <Descriptions.Item label="Description">{selectedValidatorHL7['description']}</Descriptions.Item>
+                                                            <Descriptions.Item label="Validator Preset">{selectedValidatorHL7['validation_source_type']}</Descriptions.Item>
+                                                            <Descriptions.Item label="Validator Pattern">{selectedValidatorHL7['validation_expression']}</Descriptions.Item>
+                                                        </Descriptions>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                                                            <Form.Item style={{ margin: 0 }} label='Input Data' onChange={(e) => setHl7TestInputData(e.target.value)} ><Input /></Form.Item>
+                                                            <Button type='primary' onClick={() => TestValidator(selectedValidatorHL7['validation_expression'], hl7TestInputData, 'hl7')}>Test Validator</Button>
+                                                        </div>
                                                     </div>
                                                 }
-                                                <Button type='primary' htmlType='submit'>Create Validator</Button>
+
+                                                {
+                                                    validationName === 'custom' &&
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                        <Divider>Validator Metadata</Divider>
+                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDescription(e.target.value) }} />
+                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDocDescription(e.target.value) }} />
+                                                        <Divider>Validator Pattern</Divider>
+                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression here" onChange={(e) => { setValidationRegex(e.target.value) }} />
+
+                                                        {
+                                                            validationRegex &&
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                                                                <Form.Item style={{ margin: 0 }} label='Input Data' onChange={(e) => setHl7TestInputData(e.target.value)} ><Input /></Form.Item>
+                                                                <Button type='primary' onClick={() => TestValidator(validationRegex, hl7TestInputData, 'hl7')}>Test Validator</Button>
+                                                            </div>
+                                                        }
+
+                                                    </div>
+                                                }
+
+                                                {
+                                                    hl7TestResponseData &&
+                                                    <Descriptions style={{ marginTop: '1rem' }} title="Test Response" bordered column={1}>
+                                                        <Descriptions.Item label="Validation Response">{hl7TestResponseData['validation_response'] ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />}</Descriptions.Item>
+                                                    </Descriptions>
+                                                }
+                                                <Button style={{ marginTop: '1rem' }} type='primary' htmlType='submit'>Create Validator</Button>
                                             </Form>
                                         </>
                                     )
@@ -347,19 +419,53 @@ const AttributeValidator = (props) => {
                                                         showSearch
                                                         placeholder="Select a Validator"
                                                         options={validationOptionsFhir}
-                                                        onChange={(value) => { setValidationNameFhir(value) }}
+                                                        onChange={(value) => { HandleValidationChoice('fhir', value); setFhirTestResponseData() }}
                                                     />
                                                 </Form.Item>
 
                                                 {
-                                                    validationNameFhir === 'custom' &&
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression here" onChange={(e) => { setValidationRegexFhir(e.target.value) }} />
-                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDescriptionFhir(e.target.value) }} />
-                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDocDescriptionFhir(e.target.value) }} />
+                                                    selectedValidatorFHIR &&
+                                                    <div>
+                                                        <Descriptions title="Validator Metadata" bordered column={1}>
+                                                            <Descriptions.Item label="Designation">{selectedValidatorFHIR['validation_name']}</Descriptions.Item>
+                                                            <Descriptions.Item label="Description">{selectedValidatorFHIR['description']}</Descriptions.Item>
+                                                            <Descriptions.Item label="Validator Preset">{selectedValidatorFHIR['validation_source_type']}</Descriptions.Item>
+                                                            <Descriptions.Item label="Validator Pattern">{selectedValidatorFHIR['validation_expression']}</Descriptions.Item>
+                                                        </Descriptions>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                                                            <Form.Item style={{ margin: 0 }} label='Input Data' onChange={(e) => setFhirTestInputData(e.target.value)} ><Input /></Form.Item>
+                                                            <Button type='primary' onClick={() => TestValidator(selectedValidatorFHIR['validation_expression'], fhirTestInputData, 'fhir')}>Test Validator</Button>
+                                                        </div>
                                                     </div>
                                                 }
-                                                <Button type='primary' htmlType='submit'>Create Validator</Button>
+
+                                                {
+                                                    validationNameFhir === 'custom' &&
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                        <Divider>Validator Metadata</Divider>
+                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDescriptionFhir(e.target.value) }} />
+                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression description here" onChange={(e) => { setDocDescriptionFhir(e.target.value) }} />
+                                                        <Divider>Validator Pattern</Divider>
+                                                        <TextArea rows={4} placeholder="Write your validation Regular Expression here" onChange={(e) => { setValidationRegexFhir(e.target.value) }} />
+
+                                                        {
+                                                            validationRegexFhir &&
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                                                                <Form.Item style={{ margin: 0 }} label='Input Data' onChange={(e) => setFhirTestInputData(e.target.value)} ><Input /></Form.Item>
+                                                                <Button type='primary' onClick={() => TestValidator(validationRegexFhir, fhirTestInputData, 'fhir')}>Test Validator</Button>
+                                                            </div>
+                                                        }
+
+                                                    </div>
+                                                }
+
+                                                {
+                                                    fhirTestResponseData &&
+                                                    <Descriptions style={{ marginTop: '1rem' }} title="Test Response" bordered column={1}>
+                                                        <Descriptions.Item label="Validation Response">{fhirTestResponseData['validation_response'] ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />}</Descriptions.Item>
+                                                    </Descriptions>
+                                                }
+                                                <Button style={{marginTop: '1rem'}} type='primary' htmlType='submit'>Create Validator</Button>
                                             </Form>
                                         </>
                                     )

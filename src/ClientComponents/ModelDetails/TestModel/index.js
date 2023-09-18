@@ -73,6 +73,7 @@ const TestModel = (props) => {
 
     try {
       const axios_reponse = await axios(config)
+      console.log('Server Response')
       console.log(axios_reponse.data)
       setServerResponse({
         message: 'Ready to run',
@@ -387,7 +388,12 @@ const TestModel = (props) => {
                           (
                             <div>
                               <div>Matched: {JSON.stringify(serverResponse['extracted_fields'][field]['matched'])}</div>
-                              <div>Match: {serverResponse['extracted_fields'][field]['match']}</div>
+                              <div>Match: {
+                                typeof serverResponse['extracted_fields'][field]['match'] === 'object' ?
+                                  <>{JSON.stringify(serverResponse['extracted_fields'][field]['match'])}</>
+                                  :
+                                  <>{serverResponse['extracted_fields'][field]['match']}</>
+                              }</div>
                             </div>
                           )
                           :
@@ -449,7 +455,7 @@ const TestModel = (props) => {
               }
             </Descriptions>
           }
-          <Title level={3}>Want to Integrate this Model?</Title>
+          <Title level={3}>Modal Integration</Title>
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
             <Button type='primary' onClick={GenerateRequestCodeController}>Generate {generatedCodeLang} Request Code</Button>
             <Select options={generated_code_lang_options} value={generatedCodeLang} onChange={(value) => setGeneratedCodeLang(value)} />

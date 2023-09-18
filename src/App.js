@@ -33,7 +33,7 @@ import ClientModelDetails from './ClientComponents/ModelDetails/index';
 
 import endpoints from './Components/config/endpoints.json'
 import axios from 'axios'
-import { LoadingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined, TeamOutlined, MonitorOutlined, QuestionOutlined, ReadOutlined, CheckCircleOutlined, CalculatorOutlined, CommentOutlined, SettingOutlined } from '@ant-design/icons'
+import { LoadingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, MailOutlined, DeploymentUnitOutlined, BranchesOutlined, TeamOutlined, MonitorOutlined, QuestionOutlined, ReadOutlined, CheckCircleOutlined, CalculatorOutlined, CommentOutlined, SettingOutlined, FireOutlined } from '@ant-design/icons'
 import SVGS from './svgs.js'
 import './index.css'
 
@@ -127,6 +127,12 @@ const App = () => {
                           <Menu.Item key={'/hl7-docs'} icon={<ReadOutlined />}>
                             <a href="https://hl7-definition.caristix.com/v2/HL7v2.5.1" target="_blank" rel="noopener noreferrer">
                               HL7 Docs
+                            </a>
+                          </Menu.Item>
+
+                          <Menu.Item key={'/fhir-docs'} icon={<FireOutlined />}>
+                            <a href="http://hl7.org/fhir/documentation.html" target="_blank" rel="noopener noreferrer">
+                              FHIR Docs
                             </a>
                           </Menu.Item>
 
@@ -232,6 +238,11 @@ const App = () => {
                           <Menu.Item key={'/hl7-docs'} icon={<ReadOutlined />}>
                             <a href="https://hl7-definition.caristix.com/v2/HL7v2.5.1" target="_blank" rel="noopener noreferrer">
                               HL7 Docs
+                            </a>
+                          </Menu.Item>
+                          <Menu.Item key={'/fhir-docs'} icon={<FireOutlined />}>
+                            <a href="http://hl7.org/fhir/documentation.html" target="_blank" rel="noopener noreferrer">
+                              FHIR Docs
                             </a>
                           </Menu.Item>
                           <Menu.Item key={'/about'} icon={<QuestionOutlined />}>

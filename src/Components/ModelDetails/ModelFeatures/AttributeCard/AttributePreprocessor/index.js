@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Typography, Modal, Button, Form, Select, Input, Tabs, Descriptions, Tag } from 'antd'
+import { Typography, Modal, Button, Form, Select, Input, Tabs, Descriptions, Tag, Divider } from 'antd'
+import MonacoEditor from 'react-monaco-editor';
 
 const { Paragraph, Title } = Typography
 const { TextArea } = Input
@@ -23,6 +24,12 @@ const AttributePreprocessor = (props) => {
     const [description, setDescription] = useState()
     const [docDescription, setDocDescription] = useState()
     const [preprocessingOptions, setPreprocessingOptions] = useState()
+    const [hl7Preprocessors, setHl7Preprocessors] = useState()
+    const [hl7SelectedPreprocessor, setHl7SelectedPreprocessor] = useState()
+    const [showModalHL7Script, setShowModalHL7Script] = useState(false)
+    const [hL7TestInputData, setHL7TestInputData] = useState()
+    const [hl7TestingReponse, setHL7TestingReponse] = useState()
+
 
     // FHIR Data
     const [preprocessorFhir, setPreprocessorFhir] = useState()
@@ -32,7 +39,18 @@ const AttributePreprocessor = (props) => {
     const [descriptionFhir, setDescriptionFhir] = useState()
     const [docDescriptionFhir, setDocDescriptionFhir] = useState()
     const [preprocessingOptionsFhir, setPreprocessingOptionsFhir] = useState()
+    const [fhirPreprocessors, setFhirPreprocessors] = useState()
+    const [fhirSelectedPreprocessor, setFhirSelectedPreprocessor] = useState()
+    const [showModalFHIRScript, setShowModalFHIRScript] = useState(false)
+    const [FhirTestInputData, setFHIRTestInputData] = useState()
+    const [fhirTestingReponse, setFHIRTestingReponse] = useState()
 
+    // Monaco
+    const editorOptions = {
+        minimap: { enabled: false },
+        formatOnPaste: true, // Enable automatic formatting on paste
+        formatOnType: true,  // Enable automatic formatting while typing
+    }
 
     const CheckPreprocessor = async () => {
         const config = {
@@ -60,7 +78,7 @@ const AttributePreprocessor = (props) => {
 
         if (data.status === 200) {
             setPreprocessorFhir(data.preprocessor)
-        }else{
+        } else {
             setPreprocessorFhir()
         }
     }
@@ -81,6 +99,8 @@ const AttributePreprocessor = (props) => {
             await axios(config)
             setPreprocessor()
             CheckPreprocessor()
+            setHl7SelectedPreprocessor()
+            setPreprocessingScript()
             GetModelConfigs()
         } else {
             const message = 'Unable to Delete Preprocessor!'
@@ -132,7 +152,8 @@ const AttributePreprocessor = (props) => {
     useEffect(() => {
         CheckPreprocessor()
         CheckPreprocessorFhir()
-        GetPreprocessorOptions()
+        GetPreprocessorOptions('hl7')
+        GetPreprocessorOptions('fhir')
     }, [])
 
     const CreatePreprocessor = async (values) => {
@@ -169,6 +190,8 @@ const AttributePreprocessor = (props) => {
             preprocessor_name: preprocessingNameFhir
         }
 
+
+
         if (preprocessingScriptFhir !== undefined) req_data['preprocessor_script'] = preprocessingScriptFhir
         if (descriptionFhir !== undefined) req_data['description'] = descriptionFhir
         if (docDescriptionFhir !== undefined) req_data['doc_description'] = docDescriptionFhir
@@ -186,10 +209,10 @@ const AttributePreprocessor = (props) => {
     }
 
 
-    const GetPreprocessorOptions = async () => {
+    const GetPreprocessorOptions = async (source_type) => {
         const config = {
             method: 'get',
-            url: `${endpoint}/api/preprocessors`
+            url: `${endpoint}/api/preprocessors/${source_type}`
         }
 
         const axios_response = await axios(config)
@@ -202,9 +225,40 @@ const AttributePreprocessor = (props) => {
         })
 
         treated.push({ label: 'custom', value: 'custom' })
-        setPreprocessingOptions(treated)
-        setPreprocessingOptionsFhir(treated)
+        source_type === 'hl7' ? setPreprocessingOptions(treated) : setPreprocessingOptionsFhir(treated)
+        source_type === 'hl7' ? setHl7Preprocessors(axios_response.data) : setFhirPreprocessors(axios_response.data)
+    }
 
+    const HandlePreprocessorChoice = async (value, source_type) => {
+        source_type === 'hl7' ? setPreprocessingName(value) : setPreprocessingNameFhir(value)
+        console.log(value)
+        const arrayOfObjects = source_type === 'hl7' ? hl7Preprocessors : fhirPreprocessors
+        const selectedProcessor = arrayOfObjects.find(obj => obj.preprocessor_name === value);
+
+        console.log(selectedProcessor)
+        source_type === 'hl7' ? setHl7SelectedPreprocessor(selectedProcessor) : setFhirSelectedPreprocessor(selectedProcessor)
+    }
+
+    const TestPreprocessor = async (source_type, preprocessor_script, preprocessor_name) => {
+        const data = {
+            input_data: source_type === 'hl7' ? hL7TestInputData : FhirTestInputData,
+            preprocessor_script,
+            model: model_id,
+            field: attribute_name
+        }
+
+        
+        console.log(data)
+        console.log(preprocessor_name)
+
+        const url = preprocessor_name === 'db-lookup' ? `${endpoint}/api/test-preprocessor?db_lookup=true` : `${endpoint}/api/test-preprocessor`
+        const method = 'post'
+        const config = { method, url, data }
+
+        const axios_response = await axios(config)
+        const response_data = axios_response.data
+
+        source_type === 'hl7' ? setHL7TestingReponse(response_data) : setFHIRTestingReponse(response_data)
     }
 
     return (
@@ -267,7 +321,7 @@ const AttributePreprocessor = (props) => {
                                     ) :
                                     (
                                         <>
-                                            <Title level={5}>It loooks like there isn't any preprocessor for {attribute_name}.</Title>
+                                            <Title level={5}>It looks like there isn't any HL7 preprocessor for {attribute_name}.</Title>
                                             <Form onFinish={CreatePreprocessor}>
                                                 <Form.Item
                                                     label="Preset"
@@ -276,19 +330,97 @@ const AttributePreprocessor = (props) => {
                                                         showSearch
                                                         placeholder="Select a Preprocessor"
                                                         options={preprocessingOptions}
-                                                        onChange={(value) => { setPreprocessingName(value) }}
+                                                        onChange={(value) => { HandlePreprocessorChoice(value, 'hl7'); setHL7TestingReponse(); setPreprocessingScript() }}
                                                     />
                                                 </Form.Item>
 
                                                 {
                                                     preprocessingName === 'custom' &&
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                        <TextArea rows={4} placeholder="Write your preprocessor logic here" onChange={(e) => { setPreprocessingScript(e.target.value) }} />
+                                                        <Divider>Custom Preprocessor Metadata</Divider>
+                                                        <TextArea rows={4} placeholder="Write your preprocessor documentation description here" onChange={(e) => { setDocDescription(e.target.value) }} />
                                                         <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e) => { setDescription(e.target.value) }} />
-                                                        <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e) => { setDocDescription(e.target.value) }} />
+                                                        <Divider>Custom Preprocessor Script</Divider>
+                                                        <MonacoEditor
+                                                            language="javascript" // Specify the language mode (e.g., javascript)
+                                                            theme='vs' // Specify the editor theme (e.g., vs)
+                                                            value={preprocessingScript}
+                                                            options={editorOptions}
+                                                            onChange={(newCode) => setPreprocessingScript(newCode)}
+                                                            height="30rem"
+                                                            width="100%"
+                                                            autoClosingQuotes={true}
+                                                            lineNumbers={false}
+                                                        />
+
+                                                        {
+                                                            preprocessingScript &&
+                                                            <div>
+                                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                                    <Form.Item label='Input Data'>
+                                                                        <Input onChange={(e) => setHL7TestInputData(e.target.value)} />
+                                                                    </Form.Item>
+                                                                    <Button type='primary' onClick={() => TestPreprocessor('hl7', preprocessingScript)}>Test Preprocessor</Button>
+                                                                </div>
+                                                                {
+                                                                    hl7TestingReponse &&
+                                                                    <Descriptions title='Preprocessor Test Response' bordered column={1}>
+                                                                        <Descriptions.Item label='Response'>{hl7TestingReponse['result']}</Descriptions.Item>
+                                                                    </Descriptions>
+                                                                }
+                                                            </div>
+                                                        }
+                                                        <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
                                                     </div>
                                                 }
-                                                <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
+
+                                                {
+                                                    hl7SelectedPreprocessor &&
+                                                    <div>
+                                                        <Descriptions style={{ marginBottom: '1rem' }} label='Preprocessor Metadata' bordered column={1}>
+                                                            <Descriptions.Item label='Preprocessor Name'>{hl7SelectedPreprocessor['preprocessor_name']}</Descriptions.Item>
+                                                            <Descriptions.Item label='Preprocessor Description'>{hl7SelectedPreprocessor['description']}</Descriptions.Item>
+                                                            <Descriptions.Item label='Preprocessor Source Type'>{hl7SelectedPreprocessor['preprocessor_source_type']}</Descriptions.Item>
+                                                        </Descriptions>
+
+                                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                                            <Form.Item label='Input Data'>
+                                                                <Input onChange={(e) => setHL7TestInputData(e.target.value)} />
+                                                            </Form.Item>
+                                                            <Button type='primary' onClick={() => TestPreprocessor('hl7', hl7SelectedPreprocessor['preprocessor_script'], hl7SelectedPreprocessor['preprocessor_name'])}>Test Preprocessor</Button>
+                                                        </div>
+                                                        {
+                                                            hl7TestingReponse &&
+                                                            <Descriptions title='Preprocessor Test Response' bordered column={1}>
+                                                                <Descriptions.Item label='Response'>{hl7TestingReponse['result']}</Descriptions.Item>
+                                                            </Descriptions>
+                                                        }
+
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
+                                                            <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
+                                                            <Button style={{ backgroundColor: '#FFA500' }} type='primary' onClick={() => setShowModalHL7Script(true)}>Inspect Preprocessor Code</Button>
+                                                        </div>
+
+
+                                                        <Modal title="Preprocessing Script" open={showModalHL7Script} onOk={() => setShowModalHL7Script(false)} onCancel={() => setShowModalHL7Script(false)}>
+                                                            <div>
+                                                                <MonacoEditor
+                                                                    language="javascript"
+                                                                    theme='vs'
+                                                                    options={{
+                                                                        ...editorOptions,
+                                                                        readOnly: true,
+                                                                    }}
+                                                                    height="30rem"
+                                                                    width="100%"
+                                                                    autoClosingQuotes={true}
+                                                                    lineNumbers={false}
+                                                                    value={hl7SelectedPreprocessor['preprocessor_script']}
+                                                                />
+                                                            </div>
+                                                        </Modal>
+                                                    </div>
+                                                }
                                             </Form>
                                         </>
                                     )
@@ -338,7 +470,7 @@ const AttributePreprocessor = (props) => {
                                     ) :
                                     (
                                         <>
-                                            <Title level={5}>It loooks like there isn't any preprocessor for {attribute_name}.</Title>
+                                            <Title level={5}>It looks like there isn't any FHIR preprocessor for {attribute_name}.</Title>
                                             <Form onFinish={CreatePreprocessorFhir}>
                                                 <Form.Item
                                                     label="Preset"
@@ -347,19 +479,98 @@ const AttributePreprocessor = (props) => {
                                                         showSearch
                                                         placeholder="Select a Preprocessor"
                                                         options={preprocessingOptionsFhir}
-                                                        onChange={(value) => { setPreprocessingNameFhir(value) }}
+                                                        onChange={(value) => { HandlePreprocessorChoice(value, 'fhir'); setFHIRTestingReponse(); setPreprocessingScriptFhir() }}
                                                     />
                                                 </Form.Item>
 
                                                 {
                                                     preprocessingNameFhir === 'custom' &&
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                        <TextArea rows={4} placeholder="Write your preprocessor logic here" onChange={(e) => { setPreprocessingScriptFhir(e.target.value) }} />
+                                                        <Divider>Custom Preprocessor Metadata</Divider>
                                                         <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e) => { setDescriptionFhir(e.target.value) }} />
-                                                        <TextArea rows={4} placeholder="Write your preprocessor description here" onChange={(e) => { setDocDescriptionFhir(e.target.value) }} />
+                                                        <TextArea rows={4} placeholder="Write your preprocessor documentation description here" onChange={(e) => { setDocDescriptionFhir(e.target.value) }} />
+                                                        <Divider>Custom Preprocessor Script</Divider>
+                                                        <MonacoEditor
+                                                            language="javascript" // Specify the language mode (e.g., javascript)
+                                                            theme='vs' // Specify the editor theme (e.g., vs)
+                                                            value={preprocessingScript}
+                                                            options={editorOptions}
+                                                            onChange={(newCode) => setPreprocessingScriptFhir(newCode)}
+                                                            height="30rem"
+                                                            width="100%"
+                                                            autoClosingQuotes={true}
+                                                            lineNumbers={false}
+                                                        />
+
+                                                        {
+                                                            preprocessingScriptFhir &&
+                                                            <div>
+                                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                                    <Form.Item label='Input Data'>
+                                                                        <Input onChange={(e) => setFHIRTestInputData(e.target.value)} />
+                                                                    </Form.Item>
+                                                                    <Button type='primary' onClick={() => TestPreprocessor('fhir', preprocessingScriptFhir)}>Test Preprocessor</Button>
+                                                                </div>
+                                                                {
+                                                                    fhirTestingReponse &&
+                                                                    <Descriptions title='Preprocessor Test Response' bordered column={1}>
+                                                                        <Descriptions.Item label='Response'>{fhirTestingReponse['result']}</Descriptions.Item>
+                                                                    </Descriptions>
+                                                                }
+                                                            </div>
+                                                        }
+                                                        <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
                                                     </div>
                                                 }
-                                                <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
+
+                                                {
+                                                    fhirSelectedPreprocessor &&
+                                                    <div>
+                                                        <Descriptions style={{ marginBottom: '1rem' }} label='Preprocessor Metadata' bordered column={1}>
+                                                            <Descriptions.Item label='Preprocessor Name'>{fhirSelectedPreprocessor['preprocessor_name']}</Descriptions.Item>
+                                                            <Descriptions.Item label='Preprocessor Description'>{fhirSelectedPreprocessor['description']}</Descriptions.Item>
+                                                            <Descriptions.Item label='Preprocessor Source Type'>{fhirSelectedPreprocessor['preprocessor_source_type']}</Descriptions.Item>
+                                                        </Descriptions>
+
+                                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                                            <Form.Item label='Input Data'>
+                                                                <Input onChange={(e) => setFHIRTestInputData(e.target.value)} />
+                                                            </Form.Item>
+                                                            <Button type='primary' onClick={() => TestPreprocessor('fhir', fhirSelectedPreprocessor['preprocessor_script'], fhirSelectedPreprocessor['preprocessor_name'])}>Test Preprocessor</Button>
+                                                        </div>
+                                                        {
+                                                            fhirTestingReponse &&
+                                                            <Descriptions title='Preprocessor Test Response' bordered column={1}>
+                                                                <Descriptions.Item label='Response'>{fhirTestingReponse['result']}</Descriptions.Item>
+                                                            </Descriptions>
+                                                        }
+
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
+                                                            <Button type='primary' htmlType='submit'>Create Preprocessor</Button>
+                                                            <Button style={{ backgroundColor: '#FFA500' }} type='primary' onClick={() => setShowModalFHIRScript(true)}>Inspect Preprocessor Code</Button>
+                                                        </div>
+
+
+                                                        <Modal title="Preprocessing Script" open={showModalFHIRScript} onOk={() => setShowModalFHIRScript(false)} onCancel={() => setShowModalFHIRScript(false)}>
+                                                            <div>
+                                                                <MonacoEditor
+                                                                    language="javascript"
+                                                                    theme='vs'
+                                                                    options={{
+                                                                        ...editorOptions,
+                                                                        readOnly: true,
+                                                                    }}
+                                                                    height="30rem"
+                                                                    width="100%"
+                                                                    autoClosingQuotes={true}
+                                                                    lineNumbers={false}
+                                                                    value={fhirSelectedPreprocessor['preprocessor_script']}
+                                                                />
+                                                            </div>
+                                                        </Modal>
+                                                    </div>
+
+                                                }
                                             </Form>
                                         </>
                                     )

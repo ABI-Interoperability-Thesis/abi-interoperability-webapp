@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Typography, Button, Table, notification, Popconfirm, Input, Form, Descriptions } from 'antd'
+import { Typography, Button, Table, notification, Popconfirm, Input, Form, Descriptions, Select } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
@@ -16,9 +16,10 @@ const Validations = () => {
     const [validationExpression, setValidationExpression] = useState()
     const [testValue, setTestValue] = useState()
     const [responseData, setResponseData] = useState()
+    const [selectedSourceType, setSelectedSourceType] = useState('hl7')
 
-    const GetAllValidations = async () => {
-        const url = `${mysql_endpoint}/api/validations`
+    const GetAllValidations = async (source_type) => {
+        const url = `${mysql_endpoint}/api/validations/${source_type}`
 
         const config = {
             method: 'get',
@@ -31,7 +32,7 @@ const Validations = () => {
     }
 
     useEffect(() => {
-        GetAllValidations()
+        GetAllValidations(selectedSourceType)
     }, [])
 
 
@@ -45,7 +46,7 @@ const Validations = () => {
         }
 
         await axios(config)
-        GetAllValidations()
+        GetAllValidations(selectedSourceType)
     }
 
     const CreateValidator = async (values) => {
@@ -58,8 +59,9 @@ const Validations = () => {
         }
 
         await axios(config)
-        GetAllValidations()
+        GetAllValidations(selectedSourceType)
         setCreateNew(false)
+        setResponseData()
     }
 
     const columns = [
@@ -107,12 +109,27 @@ const Validations = () => {
         setResponseData(response_data)
     }
 
+    const source_type_options = [
+        {
+            label: 'HL7',
+            value: 'hl7'
+        },
+        {
+            label: 'FHIR',
+            value: 'fhir'
+        },
+    ]
+
     return (
         <>
             <Title level={2}>General Validators</Title>
             {
                 !createNew ? (
                     <>
+                        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <p>Preprocessor Preset</p>
+                            <Select options={source_type_options} defaultValue='HL7' onChange={(value) => { GetAllValidations(value); setSelectedSourceType(value) }} />
+                        </div>
                         {
                             validations &&
                             <div>
@@ -127,6 +144,10 @@ const Validations = () => {
 
                             <Form.Item label="Validator Name" name='validation_name'>
                                 <Input placeholder="Validator name" />
+                            </Form.Item>
+
+                            <Form.Item label="Validator Name" name='validation_source_type'>
+                                <Select options={source_type_options} placeholder="Validator Preset" />
                             </Form.Item>
 
                             <Form.Item label="Validator Description" name='description'>

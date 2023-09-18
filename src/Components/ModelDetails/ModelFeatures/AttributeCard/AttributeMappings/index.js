@@ -576,9 +576,13 @@ const AttributeMappings = (props) => {
     const TestMapping = async () => {
         const mapping = GenerateFhirMapping()
         const fhir_resource = JSON.parse(testingObject)
-
+        const fhir_resource_type = fhirResourceDefinition.previous
+        
         const data = {
-            mapping,
+            mapping_obj:{
+                resource_type: fhir_resource_type,
+                mapping
+            },
             fhir_resource
         }
 
@@ -594,11 +598,19 @@ const AttributeMappings = (props) => {
         const service_response = await axios(config)
         const test_response = service_response.data.response
 
-        if (test_response !== 'no such mapping found') {
-            setTestingResponse({
-                status: 'success',
-                response: test_response
-            })
+        if (test_response !== null) {
+            if (typeof test_response === 'object') {
+                setTestingResponse({
+                    status: 'success',
+                    response: JSON.stringify(test_response)
+                })
+            } else {
+                setTestingResponse({
+                    status: 'success',
+                    response: JSON.stringify(test_response)
+                })
+            }
+
         } else {
             setTestingResponse({
                 status: 'failed'
@@ -1008,7 +1020,7 @@ const AttributeMappings = (props) => {
                                                                             setTestingResponse()
                                                                             setTestingObject(`{
         "resourceType": "${fhirResourceDefinition.previous}"
-    }`)
+}`)
                                                                         }}>Test Mapping</Button>
                                                                     </div>
                                                                 </>

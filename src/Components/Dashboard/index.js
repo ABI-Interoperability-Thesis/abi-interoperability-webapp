@@ -60,6 +60,8 @@ const Dashboard = () => {
         const config = { method, url }
         const axios_response = await axios(config)
         const req_data = axios_response.data
+        console.log('Model Configs')
+        console.log(req_data)
         setModelConfigs(req_data)
     }
 
@@ -91,11 +93,14 @@ const Dashboard = () => {
         { title: 'Model Name', dataIndex: 'model_name', key: 'model_name' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
         { title: 'Deployed', key: 'deployed', render: (obj) => (obj.deployed ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
+        { title: 'HL7 Support', key: 'hl7_support', render: (obj) => (obj.hl7_support ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
+        { title: 'FHIR Support', key: 'fhir_support', render: (obj) => (obj.fhir_support ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
         { title: 'Attributes', dataIndex: 'attribute_count', key: 'attribute_count' },
         { title: 'Default Mappings', dataIndex: 'default_mappings', key: 'default_mappings' },
         { title: 'Validators', dataIndex: 'model_validations', key: 'model_validations' },
         { title: 'Preprocessors', dataIndex: 'model_preprocessors', key: 'model_preprocessors' },
-        { title: 'Deploy Ready', key: 'configured', render: (obj) => (obj.configured ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
+        { title: 'HL7 Deploy Ready', key: 'configured', render: (obj) => (obj.configured ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
+        { title: 'FHIR Deploy Ready', key: 'configured', render: (obj) => (obj.configured_fhir ? <CheckCircleOutlined style={{ fontSize: '1.5rem', color: '#4CAF50' }} /> : <CloseCircleOutlined style={{ fontSize: '1.5rem', color: '#FF9800' }} />) },
         {
             title: 'Actions',
             key: 'action',

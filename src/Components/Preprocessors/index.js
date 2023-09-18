@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Typography, Button, Table, Popconfirm, Input, Form, Modal, Descriptions, Divider } from 'antd'
+import { Typography, Button, Table, Popconfirm, Input, Form, Modal, Descriptions, Divider, Select } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import MonacoEditor from 'react-monaco-editor';
@@ -13,12 +13,15 @@ const Preprocessors = () => {
 
     // Modal Data
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isModalOpenScript, setIsModalOpenScript] = useState(false)
+    const [selectedScript, setSelectedScript] = useState()
 
     // Preprocessor Data
     const [preprocessors, setPreprocessors] = useState()
     const [createNew, setCreateNew] = useState(false)
     const [testingValue, setTestingValue] = useState(false)
     const [responseData, setResponseData] = useState(false)
+    const [selectedSourceType, setSelectedSourceType] = useState('hl7')
 
     // Monaco Data
     const [testingObject, setTestingObject] = useState('')
@@ -35,8 +38,13 @@ const Preprocessors = () => {
         formatOnType: true,  // Enable automatic formatting while typing
     }
 
-    const GetAllPreprocessors = async () => {
-        const url = `${mysql_endpoint}/api/preprocessors`
+    useEffect(() => {
+        GetAllPreprocessors('hl7')
+    }, [])
+
+
+    const GetAllPreprocessors = async (source_type) => {
+        const url = `${mysql_endpoint}/api/preprocessors/${source_type}`
 
         const config = {
             method: 'get',
@@ -47,10 +55,6 @@ const Preprocessors = () => {
         const data = axios_response.data
         setPreprocessors(data)
     }
-
-    useEffect(() => {
-        GetAllPreprocessors()
-    }, [])
 
 
     const handleDelete = async (record) => {
@@ -63,28 +67,34 @@ const Preprocessors = () => {
         }
 
         await axios(config)
-        GetAllPreprocessors()
+        GetAllPreprocessors(selectedSourceType)
     }
 
     const CreatePreprocessor = async (values) => {
         const url = `${mysql_endpoint}/api/preprocessors/`
+        const data = {
+            ...values,
+            preprocessor_script: testingObject
+        }
 
         const config = {
             method: 'post',
             url,
-            data: values
+            data
         }
 
+        console.log(data)
+
         await axios(config)
-        GetAllPreprocessors()
+        GetAllPreprocessors(selectedSourceType)
         setCreateNew(false)
     }
 
     const columns = [
         { title: 'Preprocessor Name', dataIndex: 'preprocessor_name', key: 'preprocessor_name' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
+        { title: 'Source Type', dataIndex: 'preprocessor_source_type', key: 'preprocessor_source_type' },
         { title: 'Documentation Description', dataIndex: 'doc_description', key: 'doc_description' },
-        { title: 'Preprocessor Script', dataIndex: 'preprocessor_script', key: 'preprocessor_script' },
         {
             title: 'Actions',
             key: 'action',
@@ -103,6 +113,8 @@ const Preprocessors = () => {
                     </Popconfirm>
 
                     <Button type='primary'>Update</Button>
+
+                    <Button style={{ backgroundColor: '#FFA500' }} type='primary' onClick={() => { setSelectedScript(record['preprocessor_script']); setIsModalOpenScript(true) }}>Inspect Script</Button>
                 </div>
             ),
         }
@@ -113,6 +125,8 @@ const Preprocessors = () => {
             input_data: testingValue,
             preprocessor_script: testingObject
         }
+
+        console.log(data)
 
         const url = `${mysql_endpoint}/api/test-preprocessor`
         const method = 'post'
@@ -128,12 +142,27 @@ const Preprocessors = () => {
         setTestingObject((prevValue) => prevValue + api_value);
     }
 
+    const source_type_options = [
+        {
+            label: 'HL7',
+            value: 'hl7'
+        },
+        {
+            label: 'FHIR',
+            value: 'fhir'
+        },
+    ]
+
     return (
         <>
             <Title level={2}>General Preprocessors</Title>
             {
                 !createNew ? (
                     <>
+                        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <p>Preprocessor Source Type</p>
+                            <Select options={source_type_options} defaultValue='HL7' onChange={(value) => {GetAllPreprocessors(value); setSelectedSourceType(value)}} />
+                        </div>
                         {
                             preprocessors &&
                             <div>
@@ -149,6 +178,10 @@ const Preprocessors = () => {
                             <Divider>Preprocessor Metadata</Divider>
                             <Form.Item label="Preprocessor Name" name='preprocessor_name'>
                                 <Input placeholder="Preprocessor name" />
+                            </Form.Item>
+
+                            <Form.Item label="Preprocessor Source Type" name='preprocessor_source_type'>
+                                <Select options={source_type_options} />
                             </Form.Item>
 
                             <Form.Item label="Preprocessor Description" name='description'>
@@ -170,14 +203,14 @@ const Preprocessors = () => {
                             </div>
 
                             <Divider>Preprocessor Script</Divider>
-                            
+
                             <MonacoEditor
                                 language="javascript" // Specify the language mode (e.g., javascript)
                                 theme='vs' // Specify the editor theme (e.g., vs)
                                 value={testingObject}
                                 options={editorOptions}
                                 onChange={handleEditorChange}
-                                height="10rem"
+                                height="30rem"
                                 width="100%"
                                 autoClosingQuotes={true}
                                 lineNumbers={false}
@@ -227,6 +260,23 @@ const Preprocessors = () => {
                         result = input_data * 100
                     </pre>
                 </Paragraph>
+            </Modal>
+
+            {/* Preprocessor Script */}
+            <Modal title="Preprocessor Script" open={isModalOpenScript} onOk={() => setIsModalOpenScript(false)} onCancel={() => setIsModalOpenScript(false)}>
+                <MonacoEditor
+                    language="javascript"
+                    theme='vs'
+                    options={{
+                        ...editorOptions,
+                        readOnly: true,
+                    }}
+                    height="30rem"
+                    width="100%"
+                    autoClosingQuotes={true}
+                    lineNumbers={false}
+                    value={selectedScript}
+                />
             </Modal>
         </>
     )
