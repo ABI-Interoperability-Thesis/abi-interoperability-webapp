@@ -56,25 +56,25 @@ const App = () => {
   } = theme.useToken();
 
   const VerifyIfLoggedIn = async () => {
-    const url = `${mysql_endpoint}/auth/is-logged-in`
-    const method = 'get'
-    const headers = {
-      'session-token': localStorage.getItem('session-token')
-    }
+    try {
+      const url = `${mysql_endpoint}/auth/is-logged-in`
+      const method = 'get'
+      const headers = {
+        'session-token': localStorage.getItem('session-token')
+      }
 
-    const config = { method, url, headers }
+      const config = { method, url, headers }
 
-    const axios_response = await axios(config)
-    const res_data = axios_response.data
-    console.log(res_data)
+      const axios_response = await axios(config)
+      const res_data = axios_response.data
+      console.log(res_data)
 
-    if (res_data.status === 200) {
       console.log(res_data.account_data)
       setCurrentAcc(res_data.account_data)
       setLoggedIn(true)
       navigate('/')
       setLoading(false)
-    } else {
+    } catch (error) {
       setLoggedIn(false)
       setLoading(false)
     }
@@ -191,7 +191,7 @@ const App = () => {
                             <Route path="/requests/:req_id" element={<RequestDetails />} />
                             <Route path="/models" element={<ClientModels />} />
                             <Route path="/models/:model_id" element={<ClientModelDetails />} />
-                              <Route path="/attribute-mappings/:model_name/:model_attribute" element={<AttributeMappingDetails />} />
+                            <Route path="/attribute-mappings/:model_name/:model_attribute" element={<AttributeMappingDetails />} />
                           </Routes>
                         </Content>
                       </Layout>
