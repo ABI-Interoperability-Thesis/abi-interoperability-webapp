@@ -30,8 +30,8 @@ COPY . .
 RUN npm run build
 
 #Stage 2
-FROM nginx:1.19.0
+FROM nginx:1.25.2
 WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
-COPY --from=build /app/build .
+COPY --from=builder /app/build .
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
