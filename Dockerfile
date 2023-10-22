@@ -1,27 +1,4 @@
-# BACKUP OF ORIGINAL DOCKERFILE FOR RUNNING SERVE
-# # Use an official Node.js runtime as the base image
-# FROM node:alpine
-
-# # Set the working directory inside the container
-# WORKDIR /app
-
-# # Copy package.json and package-lock.json to the working directory
-# COPY package*.json ./
-
-# # Install app dependencies
-# RUN npm install
-
-# # Copy the rest of the application code
-# COPY . .
-
-# # Expose the port your app runs on
-# EXPOSE 3000
-
-# # Define the command to start your app
-# CMD ["npm", "start"]
-
-# NEW DOCKERFILE FOR RUNNING BUILT APP
-# Stage 1
+# Stage 1 [Building the web application]
 FROM node:alpine as builder
 WORKDIR /app
 COPY package*.json ./
@@ -39,7 +16,7 @@ ENV REACT_APP_MIRTH_SERVICE_ENDPOINT $REACT_APP_MIRTH_SERVICE_ENDPOINT
 ENV REACT_APP_RABBITMQ_SERVICE_ENDPOINT $REACT_APP_RABBITMQ_SERVICE_ENDPOINT
 RUN npm run build
 
-#Stage 2
+#Stage 2 [Serving web app with nginx]
 FROM nginx:1.25.2
 WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
