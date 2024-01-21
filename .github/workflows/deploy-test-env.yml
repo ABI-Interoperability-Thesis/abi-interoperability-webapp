@@ -1,0 +1,32 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  install-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: npm install
+
+  build:
+    runs-on: abi-interoperability-ci
+    needs: install-dependencies
+    if: success()
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Building Web Application
+        run: docker-compose -f /home/iacd/interoperability/ci-system-config/docker-compose.yaml build abi-webapp
+
+      - name: Run Development Docker Compose
+        run: docker-compose -f /home/iacd/interoperability/ci-system-config/docker-compose.yaml up -d
